@@ -445,7 +445,7 @@ def record(
     # Using `with` to exist smoothly if an execption is raised.
     futures = []
     num_image_writers = num_image_writers_per_camera * len(robot.cameras)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=num_image_writers) as executor:
+    with concurrent.futures.ProcessPoolExecutor(max_workers=num_image_writers) as executor:
         # Start recording all episodes
         while episode_index < num_episodes:
             logging.info(f"Recording episode {episode_index}")

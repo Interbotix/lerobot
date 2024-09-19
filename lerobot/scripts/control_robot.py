@@ -583,8 +583,19 @@ def record(
 
             # Wait if necessary
             with tqdm.tqdm(total=reset_time_s, desc="Waiting") as pbar:
+
+                if not robot.is_connected:
+                    robot.connect()
+
                 while timestamp < reset_time_s and not is_last_episode:
-                    time.sleep(1)
+                    start_loop_t = time.perf_counter()
+                    robot.teleop_step()
+
+                    if fps is not None:
+                        dt_s = time.perf_counter() - start_loop_t
+                        busy_wait(1 / fps - dt_s)
+
+                    dt_s = time.perf_counter() - start_loop_t
                     timestamp = time.perf_counter() - start_vencod_t
                     pbar.update(1)
                     if exit_early:

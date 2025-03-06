@@ -71,7 +71,7 @@ pyserial = {version = ">=3.5", optional = true}
 jsonlines = ">=4.0.0"
 transformers = ">=4.48.0"
 draccus = {git = "https://github.com/dlwh/draccus.git"} # replace with draccus = ">=0.9.4" when https://github.com/dlwh/draccus/pull/29 is in release
-
+trossen-arm = {version = ">=1.6.0", optional = true}
 
 [tool.poetry.extras]
 dora = ["gym-dora"]
@@ -87,6 +87,7 @@ feetech = ["feetech-servo-sdk", "pynput"]
 intelrealsense = ["pyrealsense2"]
 stretch = ["hello-robot-stretch-body", "pyrender", "pyrealsense2", "pynput"]
 pi0 = ["transformers"]
+trossen_ai = ["pyrealsense2", "trossen-arm"]
 
 [tool.ruff]
 line-length = 110

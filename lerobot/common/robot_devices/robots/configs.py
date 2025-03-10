@@ -610,7 +610,7 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
 
     leader_arms: dict[str, MotorsBusConfig] = field(
         default_factory=lambda: {
-            "left": TrossenArmDriverConfig(
+            "main": TrossenArmDriverConfig(
                 # wxai
                 ip="192.168.1.2",
                 model="V0_LEADER",
@@ -620,7 +620,7 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
 
     follower_arms: dict[str, MotorsBusConfig] = field(
         default_factory=lambda: {
-            "left": TrossenArmDriverConfig(
+            "main": TrossenArmDriverConfig(
                 ip="192.168.1.3",
                 model="V0_FOLLOWER",
             ),

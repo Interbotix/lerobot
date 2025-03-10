@@ -10,6 +10,7 @@ from lerobot.common.robot_devices.robots.configs import (
     So100RobotConfig,
     StretchRobotConfig,
     TrossenAIBimanualRobotConfig,
+    TrossenAISoloRobotConfig,
 )
 
 
@@ -48,6 +49,8 @@ def make_robot_config(robot_type: str, **kwargs) -> RobotConfig:
         return StretchRobotConfig(**kwargs)
     elif robot_type == "trossen_ai_bimanual":
         return TrossenAIBimanualRobotConfig(**kwargs)
+    elif robot_type == "trossen_ai_solo":
+        return TrossenAISoloRobotConfig(**kwargs)
     else:
         raise ValueError(f"Robot type '{robot_type}' is not available.")
 

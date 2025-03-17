@@ -87,7 +87,7 @@ feetech = ["feetech-servo-sdk", "pynput"]
 intelrealsense = ["pyrealsense2"]
 stretch = ["hello-robot-stretch-body", "pyrender", "pyrealsense2", "pynput"]
 pi0 = ["transformers"]
-trossen_ai = ["pyrealsense2", "trossen-arm"]
+trossen_ai = ["pyrealsense2", "trossen-arm", "pynput"]
 
 [tool.ruff]
 line-length = 110

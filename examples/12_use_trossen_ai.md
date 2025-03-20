@@ -49,7 +49,7 @@ conda install -y -c conda-forge "opencv>=4.10.0"
 By running the following code, you can start your first **SAFE** teleoperation:
 ```bash
 python lerobot/scripts/control_robot.py \
-  --robot.type=trossen_ai_bimanual \
+  --robot.type=trossen_ai_stationary \
   --robot.max_relative_target=5 \
   --control.type=teleoperate
 ```
@@ -58,7 +58,7 @@ By adding `--robot.max_relative_target=5`, we override the default value for `ma
 
 ```bash
 python lerobot/scripts/control_robot.py \
-  --robot.type=trossen_ai_bimanual \
+  --robot.type=trossen_ai_stationary \
   --robot.max_relative_target=null \
   --control.type=teleoperate
 ```
@@ -86,12 +86,12 @@ Note: We recommend using `--control.num_image_writer_threads_per_camera=8` for b
 
 ```bash
 python lerobot/scripts/control_robot.py \
-  --robot.type=trossen_ai_bimanual \
+  --robot.type=trossen_ai_stationary \
   --robot.max_relative_target=null \
   --control.type=record \
   --control.fps=30 \
   --control.single_task="Grasp a lego block and put it in the bin." \
-  --control.repo_id=${HF_USER}/trossen_ai_bimanual_test \
+  --control.repo_id=${HF_USER}/trossen_ai_stationary_test \
   --control.tags='["tutorial"]' \
   --control.warmup_time_s=5 \
   --control.episode_time_s=30 \
@@ -105,13 +105,13 @@ python lerobot/scripts/control_robot.py \
 
 If you uploaded your dataset to the hub with `--control.push_to_hub=true`, you can [visualize your dataset online](https://huggingface.co/spaces/lerobot/visualize_dataset) by copy pasting your repo id given by:
 ```bash
-echo ${HF_USER}/trossen_ai_bimanual_test
+echo ${HF_USER}/trossen_ai_stationary_test
 ```
 
 If you didn't upload with `--control.push_to_hub=false`, you can also visualize it locally with:
 ```bash
 python lerobot/scripts/visualize_dataset_html.py \
-  --repo-id ${HF_USER}/trossen_ai_bimanual_test
+  --repo-id ${HF_USER}/trossen_ai_stationary_test
 ```
 
 ## Replay an episode
@@ -120,11 +120,11 @@ python lerobot/scripts/visualize_dataset_html.py \
 Now try to replay the first episode on your robot:
 ```bash
 python lerobot/scripts/control_robot.py \
-  --robot.type=trossen_ai_bimanual \
+  --robot.type=trossen_ai_stationary \
   --robot.max_relative_target=null \
   --control.type=replay \
   --control.fps=30 \
-  --control.repo_id=${HF_USER}/trossen_ai_bimanual_test \
+  --control.repo_id=${HF_USER}/trossen_ai_stationary_test \
   --control.episode=0
 ```
 
@@ -133,47 +133,47 @@ python lerobot/scripts/control_robot.py \
 To train a policy to control your robot, use the [`python lerobot/scripts/train.py`](../lerobot/scripts/train.py) script. A few arguments are required. Here is an example command:
 ```bash
 python lerobot/scripts/train.py \
-  --dataset.repo_id=${HF_USER}/trossen_ai_bimanual_test \
+  --dataset.repo_id=${HF_USER}/trossen_ai_stationary_test \
   --policy.type=act \
-  --output_dir=outputs/train/act_trossen_ai_bimanual_test \
-  --job_name=act_trossen_ai_bimanual_test \
+  --output_dir=outputs/train/act_trossen_ai_stationary_test \
+  --job_name=act_trossen_ai_stationary_test \
   --device=cuda \
   --wandb.enable=true
 ```
 
 Let's explain it:
-1. We provided the dataset as argument with `--dataset.repo_id=${HF_USER}/trossen_ai_bimanual_test`.
+1. We provided the dataset as argument with `--dataset.repo_id=${HF_USER}/trossen_ai_stationary_test`.
 2. We provided the policy with `policy.type=act`. This loads configurations from [`configuration_act.py`](../lerobot/common/policies/act/configuration_act.py). Importantly, this policy will automatically adapt to the number of motor sates, motor actions and cameras of your robot (e.g. `laptop` and `phone`) which have been saved in your dataset.
 4. We provided `device=cuda` since we are training on a Nvidia GPU, but you could use `device=mps` to train on Apple silicon.
 5. We provided `wandb.enable=true` to use [Weights and Biases](https://docs.wandb.ai/quickstart) for visualizing training plots. This is optional but if you use it, make sure you are logged in by running `wandb login`.
 
 For more information on the `train` script see the previous tutorial: [`examples/4_train_policy_with_script.md`](../examples/4_train_policy_with_script.md)
 
-Training should take several hours. You will find checkpoints in `outputs/train/act_trossen_ai_bimanual_test/checkpoints`.
+Training should take several hours. You will find checkpoints in `outputs/train/act_trossen_ai_stationary_test/checkpoints`.
 
 ## Evaluate your policy
 
 You can use the `record` function from [`lerobot/scripts/control_robot.py`](../lerobot/scripts/control_robot.py) but with a policy checkpoint as input. For instance, run this command to record 10 evaluation episodes:
 ```bash
 python lerobot/scripts/control_robot.py \
-  --robot.type=trossen_ai_bimanual \
+  --robot.type=trossen_ai_stationary \
   --control.type=record \
   --control.fps=30 \
   --control.single_task="Grasp a lego block and put it in the bin." \
-  --control.repo_id=${HF_USER}/eval_act_trossen_ai_bimanual_test \
+  --control.repo_id=${HF_USER}/eval_act_trossen_ai_stationary_test \
   --control.tags='["tutorial"]' \
   --control.warmup_time_s=5 \
   --control.episode_time_s=30 \
   --control.reset_time_s=30 \
   --control.num_episodes=10 \
   --control.push_to_hub=true \
-  --control.policy.path=outputs/train/act_trossen_ai_bimanual_test/checkpoints/last/pretrained_model \
+  --control.policy.path=outputs/train/act_trossen_ai_stationary_test/checkpoints/last/pretrained_model \
   --control.num_image_writer_processes=1
 ```
 
 As you can see, it's almost the same command as previously used to record your training dataset. Two things changed:
-1. There is an additional `--control.policy.path` argument which indicates the path to your policy checkpoint with  (e.g. `outputs/train/eval_act_trossen_ai_bimanual_test/checkpoints/last/pretrained_model`). You can also use the model repository if you uploaded a model checkpoint to the hub (e.g. `${HF_USER}/act_trossen_ai_bimanual_test`).
-2. The name of dataset begins by `eval` to reflect that you are running inference (e.g. `${HF_USER}/eval_act_trossen_ai_bimanual_test`).
+1. There is an additional `--control.policy.path` argument which indicates the path to your policy checkpoint with  (e.g. `outputs/train/eval_act_trossen_ai_stationary_test/checkpoints/last/pretrained_model`). You can also use the model repository if you uploaded a model checkpoint to the hub (e.g. `${HF_USER}/act_trossen_ai_stationary_test`).
+2. The name of dataset begins by `eval` to reflect that you are running inference (e.g. `${HF_USER}/eval_act_trossen_ai_stationary_test`).
 3. We use `--control.num_image_writer_processes=1` instead of the default value (`0`). On our computer, using a dedicated process to write images from the 4 cameras on disk allows to reach constent 30 fps during inference. Feel free to explore different values for `--control.num_image_writer_processes`.
 
 ## More

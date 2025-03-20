@@ -614,9 +614,9 @@ class LeKiwiRobotConfig(RobotConfig):
     mock: bool = False
 
 
-@RobotConfig.register_subclass("trossen_ai_bimanual")
+@RobotConfig.register_subclass("trossen_ai_stationary")
 @dataclass
-class TrossenAIBimanualRobotConfig(ManipulatorRobotConfig):
+class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
 
     # /!\ FOR SAFETY, READ THIS /!\
     # `max_relative_target` limits the magnitude of the relative positional target vector for safety purposes.

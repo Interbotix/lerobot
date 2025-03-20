@@ -225,12 +225,16 @@ class ManipulatorRobot:
 
     def teleop_safety_stop(self):
         if self.robot_type in ["trossen_ai_bimanual", "trossen_ai_solo"]:
-            for arms in self.follower_arms:
-                self.follower_arms[arms].write("Reset", 1)
-                self.follower_arms[arms].write("Torque_Enable", 1)
             for arms in self.leader_arms:
                 self.leader_arms[arms].write("Reset", 1)
+            for arms in self.follower_arms:
+                self.follower_arms[arms].write("Reset", 1)
+            time.sleep(2)
+            for arms in self.leader_arms:
                 self.leader_arms[arms].write("Torque_Enable", 0)
+            for arms in self.follower_arms:
+                self.follower_arms[arms].write("Torque_Enable", 1)
+            
 
     def connect(self):
         if self.is_connected:
@@ -250,6 +254,8 @@ class ManipulatorRobot:
         for name in self.leader_arms:
             print(f"Connecting {name} leader arm.")
             self.leader_arms[name].connect()
+        
+        time.sleep(2)
 
         if self.robot_type in ["koch", "koch_bimanual", "aloha", "trossen_ai_bimanual", "trossen_ai_solo"]:
             from lerobot.common.robot_devices.motors.dynamixel import TorqueMode
@@ -628,6 +634,8 @@ class ManipulatorRobot:
 
         for name in self.leader_arms:
             self.leader_arms[name].disconnect()
+        
+        time.sleep(2)
 
         for name in self.cameras:
             self.cameras[name].disconnect()

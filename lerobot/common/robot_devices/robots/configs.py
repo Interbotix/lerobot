@@ -749,3 +749,72 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
     )
 
     mock: bool = False
+
+
+@RobotConfig.register_subclass("trossen_ai_mobile")
+@dataclass
+class TrossenAIMobileConfig(RobotConfig):
+    
+    max_relative_target: int | None = 5
+
+    leader_arms: dict[str, MotorsBusConfig] = field(
+        default_factory=lambda: {
+            "left": TrossenArmDriverConfig(
+                # wxai
+                ip="192.168.1.3",
+                model="V0_LEADER",
+            ),
+            "right": TrossenArmDriverConfig(
+                # wxai
+                ip="192.168.1.2",
+                model="V0_LEADER",
+            ),
+        }
+    )
+
+    follower_arms: dict[str, MotorsBusConfig] = field(
+        default_factory=lambda: {
+            "left": TrossenArmDriverConfig(
+                ip="192.168.1.5",
+                model="V0_FOLLOWER",
+            ),
+            "right": TrossenArmDriverConfig(
+                ip="192.168.1.4",
+                model = "V0_FOLLOWER",
+            ),
+        }
+    )
+
+    # Troubleshooting: If one of your IntelRealSense cameras freeze during
+    # data recording due to bandwidth limit, you might need to plug the camera
+    # on another USB hub or PCIe card.
+    cameras: dict[str, CameraConfig] = field(
+        default_factory=lambda: {
+            "cam_high": IntelRealSenseCameraConfig(
+                serial_number=218622270304,
+                fps=30,
+                width=640,
+                height=480,
+            ),
+            "cam_low": IntelRealSenseCameraConfig(
+                serial_number=130322272628,
+                fps=30,
+                width=640,
+                height=480,
+            ),
+            "cam_left_wrist": IntelRealSenseCameraConfig(
+                serial_number=218622274938,
+                fps=30,
+                width=640,
+                height=480,
+            ),
+            "cam_right_wrist": IntelRealSenseCameraConfig(
+                serial_number=128422271347,
+                fps=30,
+                width=640,
+                height=480,
+            ),
+        }
+    )
+
+    mock: bool = False

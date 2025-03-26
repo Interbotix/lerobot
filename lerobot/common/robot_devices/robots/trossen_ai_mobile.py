@@ -1,15 +1,15 @@
 import time
 from dataclasses import replace
 import torch
-
+import numpy as np
 import trossen_slate as slate
 from lerobot.common.robot_devices.cameras.utils import make_cameras_from_configs
 from lerobot.common.robot_devices.motors.utils import MotorsBus, make_motors_buses_from_configs
 from lerobot.common.robot_devices.robots.utils import get_arm_id
 import threading
 import logging
-
-from lerobot.common.robot_devices.robots.configs import TrossenAIMobileConfig
+import queue
+from lerobot.common.robot_devices.robots.configs import TrossenAIMobileRobotConfig
 from lerobot.common.robot_devices.robots.configs import ManipulatorRobotConfig
 from lerobot.common.robot_devices.robots.utils import get_arm_id
 from lerobot.common.robot_devices.utils import RobotDeviceAlreadyConnectedError, RobotDeviceNotConnectedError
@@ -36,14 +36,14 @@ def ensure_safe_goal_position(
 
 class TrossenAIMobile():
 
-    def __init__(self, config: TrossenAIMobileConfig | None = None, **kwargs):
-        super().__init__()
+    def __init__(self, config: TrossenAIMobileRobotConfig | None = None, **kwargs):
         if config is None:
-            self.config = TrossenAIMobileConfig(**kwargs)
+            self.config = TrossenAIMobileRobotConfig(**kwargs)
         else:
             # Overwrite config arguments using kwargs
             self.config = replace(config, **kwargs)
         self.robot_type = self.config.type
+        self.enable_motor_torque = self.config.enable_motor_torque
         self.leader_arms = make_motors_buses_from_configs(self.config.leader_arms)
         self.follower_arms = make_motors_buses_from_configs(self.config.follower_arms)
         self.cameras = make_cameras_from_configs(self.config.cameras)
@@ -61,6 +61,7 @@ class TrossenAIMobile():
 
         self.log_data = slate.ChassisData()
         self.update_thread = None
+        self.queue = None
 
     def get_motor_names(self, arm: dict[str, MotorsBus]) -> list:
         return [f"{arm}_{motor}" for arm, bus in arm.items() for motor in bus.motors]
@@ -118,25 +119,22 @@ class TrossenAIMobile():
         return available_arms
 
     def teleop_safety_stop(self):
-        if self.robot_type in ["trossen_ai_stationary", "trossen_ai_solo"]:
-            for arms in self.leader_arms:
-                self.leader_arms[arms].write("Reset", 1)
-            for arms in self.follower_arms:
-                self.follower_arms[arms].write("Reset", 1)
-            time.sleep(2)
-            for arms in self.leader_arms:
-                self.leader_arms[arms].write("Torque_Enable", 0)
-            for arms in self.follower_arms:
-                self.follower_arms[arms].write("Torque_Enable", 1)
+        
+        for arms in self.leader_arms:
+            self.leader_arms[arms].write("Reset", 1)
+        for arms in self.follower_arms:
+            self.follower_arms[arms].write("Reset", 1)
+        time.sleep(2)
+        for arms in self.leader_arms:
+            self.leader_arms[arms].write("Torque_Enable", 0)
+        for arms in self.follower_arms:
+            self.follower_arms[arms].write("Torque_Enable", 1)
 
     def connect(self) -> None:
-        self.base.init_base()
-        self.is_connected = True
 
-        # Start Reading
-        self.read_data = True
-        self.update_thread = threading.Thread(target=self.update_values)
-        self.update_thread.start()
+        self.base.init_base()
+
+        self.base.enable_motor_torque(self.enable_motor_torque)
 
         if self.is_connected:
             raise RobotDeviceAlreadyConnectedError(
@@ -182,12 +180,14 @@ class TrossenAIMobile():
 
         self.is_connected = True
 
-    def update_values(self):
-        while self.read_data:
-            self.base.update_state()
-            self.base.read(self.log_data)
+    # def update_values(self, queue):
+    #     while self.read_data:
+    #         self.base.update_state()
+    #         self.base.read(self.log_data)
 
     def get_state(self) -> dict:
+        self.base.update_state()
+        self.base.read(self.log_data)
         return {
             "odom_x": self.log_data.odom_x,
             "odom_y": self.log_data.odom_y,
@@ -233,6 +233,9 @@ class TrossenAIMobile():
             self.follower_arms[name].write("Goal_Position", goal_pos)
             self.logs[f"write_follower_{name}_goal_pos_dt_s"] = time.perf_counter() - before_fwrite_t
 
+        base_state = self.get_state()
+
+        print("Base State: ", base_state)
        
         if not record_data:
             return
@@ -247,7 +250,7 @@ class TrossenAIMobile():
 
         before_read_t = time.perf_counter()
         base_state = self.get_state()
-        base_action = [state['linear_vel'], state['angular_vel']]
+        base_action = [base_state['linear_vel'], base_state['angular_vel']]
         self.logs["read_base_dt_s"] = time.perf_counter() - before_read_t
 
         # Create state by concatenating follower current position
@@ -255,7 +258,7 @@ class TrossenAIMobile():
         for name in self.follower_arms:
             if name in follower_pos:
                 state.append(follower_pos[name])
-        state.append(base_state.values())
+        state.append(torch.as_tensor(list(base_state.values())))
         state = torch.cat(state)
 
         # Create action by concatenating follower goal position
@@ -263,7 +266,7 @@ class TrossenAIMobile():
         for name in self.follower_arms:
             if name in follower_goal_pos:
                 action.append(follower_goal_pos[name])
-        action.append(base_action)
+        action.append(torch.as_tensor(list(base_action)))
         action = torch.cat(action)
 
         # Capture images from cameras
@@ -361,12 +364,14 @@ class TrossenAIMobile():
             goal_pos = goal_pos.numpy().astype(np.float32)
             self.follower_arms[name].write("Goal_Position", goal_pos)
 
-        linear_vel, angular_vel = action.tolist()
+        linear_vel, angular_vel = action.tolist()[-2:]
+        print("Linear Vel: ", linear_vel)
+        print("Angular Vel: ", angular_vel)
         before_write_t = time.perf_counter()
         self.base.set_cmd_vel(linear_vel, angular_vel)
         self.logs["write_base_dt_s"] = time.perf_counter() - before_write_t
 
-        action_sent.append([linear_vel, angular_vel])
+        action_sent.append(action[-2:])
 
         return torch.cat(action_sent)
 
@@ -375,6 +380,8 @@ class TrossenAIMobile():
             raise RobotDeviceNotConnectedError(
                 "ManipulatorRobot is not connected. You need to run `robot.connect()` before disconnecting."
             )
+        
+        self.base.enable_motor_torque(False)
 
         for name in self.follower_arms:
             self.follower_arms[name].disconnect()
@@ -387,9 +394,6 @@ class TrossenAIMobile():
         for name in self.cameras:
             self.cameras[name].disconnect()
         
-        self.read_data = False
-        if self.update_thread is not None:
-            self.update_thread.join()
         self.is_connected = False
 
     def __del__(self):

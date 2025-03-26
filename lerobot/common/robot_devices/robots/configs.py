@@ -664,13 +664,7 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
     cameras: dict[str, CameraConfig] = field(
         default_factory=lambda: {
             "cam_high": IntelRealSenseCameraConfig(
-                serial_number=218622270304,
-                fps=30,
-                width=640,
-                height=480,
-            ),
-            "cam_low": IntelRealSenseCameraConfig(
-                serial_number=130322272628,
+                serial_number=130322270184,
                 fps=30,
                 width=640,
                 height=480,
@@ -753,9 +747,11 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
 
 @RobotConfig.register_subclass("trossen_ai_mobile")
 @dataclass
-class TrossenAIMobileConfig(RobotConfig):
+class TrossenAIMobileRobotConfig(RobotConfig):
     
     max_relative_target: int | None = 5
+
+    enable_motor_torque: bool = False
 
     leader_arms: dict[str, MotorsBusConfig] = field(
         default_factory=lambda: {
@@ -791,13 +787,7 @@ class TrossenAIMobileConfig(RobotConfig):
     cameras: dict[str, CameraConfig] = field(
         default_factory=lambda: {
             "cam_high": IntelRealSenseCameraConfig(
-                serial_number=218622270304,
-                fps=30,
-                width=640,
-                height=480,
-            ),
-            "cam_low": IntelRealSenseCameraConfig(
-                serial_number=130322272628,
+                serial_number=130322270184,
                 fps=30,
                 width=640,
                 height=480,

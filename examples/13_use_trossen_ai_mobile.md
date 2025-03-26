@@ -27,7 +27,7 @@ conda create -y -n lerobot python=3.10 && conda activate lerobot
 
 4. Clone LeRobot:
 ```bash
-git clone https://github.com/Interbotix/lerobot.git ~/lerobot
+git clone -b trossen-ai https://github.com/Interbotix/lerobot.git ~/lerobot
 ```
 
 5. Install LeRobot with dependencies for the Trossen AI arms (trossen-arm) and cameras (intelrealsense):
@@ -65,7 +65,7 @@ python lerobot/scripts/control_robot.py \
 
 ## Record a dataset
 
-Once you're familiar with teleoperation, you can record your first dataset with Trossen AI.
+Once you're familiar with teleoperation, you can record your first dataset with Trossen AI Mobile Kit.
 
 If you want to use the Hugging Face hub features for uploading your dataset and you haven't previously done it, make sure you've logged in using a write-access token, which can be generated from the [Hugging Face settings](https://huggingface.co/settings/tokens):
 
@@ -112,7 +112,7 @@ echo ${HF_USER}/trossen_ai_mobile_test
 If you didn't upload with `--control.push_to_hub=false`, you can also visualize it locally with:
 ```bash
 python lerobot/scripts/visualize_dataset_html.py \
-  --repo-id TXAI_MOBILE_01/trossen_ai_mobile_test
+  --repo-id ${HF_USER}/trossen_ai_mobile_test
 ```
 
 ## Replay an episode

@@ -98,7 +98,7 @@ class TrossenArmDriver:
         self.TIME_SCALING_FACTOR = 3.0
 
         # Minimum time to move for the arm (This is a tuning parameter)
-        self.MIN_TIME_TO_MOVE = 6.0/ self.fps
+        self.MIN_TIME_TO_MOVE = 6.0 / self.fps
 
     def connect(self):
         print(f"Connecting to {self.model} arm at {self.ip}...")
@@ -130,7 +130,6 @@ class TrossenArmDriver:
             )
             raise
         
-        self.driver.set_continuity_factors([10.0 , 10.0, 10.0, 10.0, 10.0, 10.0, 10.0])
         # Move the arms to the home pose
         self.driver.set_all_modes(trossen.Mode.position)
         self.driver.set_all_positions(self.home_pose, 2.0, False)

@@ -6,9 +6,7 @@ import trossen_slate as slate
 from lerobot.common.robot_devices.cameras.utils import make_cameras_from_configs
 from lerobot.common.robot_devices.motors.utils import MotorsBus, make_motors_buses_from_configs
 from lerobot.common.robot_devices.robots.utils import get_arm_id
-import threading
 import logging
-import queue
 from lerobot.common.robot_devices.robots.configs import TrossenAIMobileRobotConfig
 from lerobot.common.robot_devices.robots.utils import get_arm_id
 from lerobot.common.robot_devices.utils import RobotDeviceAlreadyConnectedError, RobotDeviceNotConnectedError
@@ -47,18 +45,13 @@ class TrossenAIMobile():
         self.follower_arms = make_motors_buses_from_configs(self.config.follower_arms)
         self.cameras = make_cameras_from_configs(self.config.cameras)
         self.is_connected = False
-        self.teleop = None
         self.logs = {}
-
         self.base = slate.TrossenSlate()
-
-        self.state_keys = None
-        self.action_keys = None
-
         self.slate_base_data = slate.ChassisData()
 
     def get_motor_names(self, arm: dict[str, MotorsBus]) -> list:
         return [f"{arm}_{motor}" for arm, bus in arm.items() for motor in bus.motors]
+    
     @property
     def camera_features(self) -> dict:
         cam_ft = {}

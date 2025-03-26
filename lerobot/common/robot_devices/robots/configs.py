@@ -669,6 +669,12 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
                 width=640,
                 height=480,
             ),
+            "cam_low": IntelRealSenseCameraConfig(
+                serial_number=130322270184,
+                fps=30,
+                width=640,
+                height=480,
+            ),
             "cam_left_wrist": IntelRealSenseCameraConfig(
                 serial_number=218622274938,
                 fps=30,
@@ -808,3 +814,4 @@ class TrossenAIMobileRobotConfig(RobotConfig):
     )
 
     mock: bool = False
+    

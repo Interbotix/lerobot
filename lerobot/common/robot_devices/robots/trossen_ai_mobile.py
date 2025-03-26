@@ -59,7 +59,6 @@ class TrossenAIMobile():
 
     def get_motor_names(self, arm: dict[str, MotorsBus]) -> list:
         return [f"{arm}_{motor}" for arm, bus in arm.items() for motor in bus.motors]
-    
     @property
     def camera_features(self) -> dict:
         cam_ft = {}
@@ -125,12 +124,10 @@ class TrossenAIMobile():
             self.follower_arms[arms].write("Torque_Enable", 1)
 
     def connect(self) -> None:
-
         if self.is_connected:
             raise RobotDeviceAlreadyConnectedError(
                 "TrossenAIMobileRobot is already connected. Do not run `robot.connect()` twice."
             )
-        
         self.base.init_base()
 
         self.base.enable_motor_torque(self.enable_motor_torque)
@@ -147,7 +144,6 @@ class TrossenAIMobile():
         for name in self.leader_arms:
             print(f"Connecting {name} leader arm.")
             self.leader_arms[name].connect()
-        
         time.sleep(2)
 
         # We assume that at connection time, arms are in a rest position, and torque can
@@ -224,7 +220,6 @@ class TrossenAIMobile():
             self.logs[f"write_follower_{name}_goal_pos_dt_s"] = time.perf_counter() - before_fwrite_t
 
         base_state = self.get_base_state()
-       
         if not record_data:
             return
 
@@ -276,7 +271,6 @@ class TrossenAIMobile():
         return obs_dict, action_dict
 
     def capture_observation(self):
-
         if not self.is_connected:
             raise RobotDeviceNotConnectedError(
                 "TrossenAIMobileRobot is not connected. You need to run `robot.connect()`."
@@ -366,7 +360,6 @@ class TrossenAIMobile():
             raise RobotDeviceNotConnectedError(
                 "TrossenAIMobileRobot is not connected. You need to run `robot.connect()` before disconnecting."
             )
-        
         self.base.enable_motor_torque(False)
 
         for name in self.follower_arms:
@@ -374,12 +367,10 @@ class TrossenAIMobile():
 
         for name in self.leader_arms:
             self.leader_arms[name].disconnect()
-        
         time.sleep(2)
 
         for name in self.cameras:
             self.cameras[name].disconnect()
-        
         self.is_connected = False
 
     def __del__(self):

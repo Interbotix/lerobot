@@ -71,8 +71,6 @@ class TrossenArmDriver:
         self.driver = None
         self.calibration = None
         self.is_connected = False
-        self.group_readers = {}
-        self.group_writers = {}
         self.logs = {}
         self.fps = 30
         self.home_pose = [0, np.pi/12, np.pi/12, 0, 0, 0, 0]

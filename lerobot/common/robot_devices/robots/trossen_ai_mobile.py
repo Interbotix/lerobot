@@ -11,25 +11,7 @@ from lerobot.common.robot_devices.robots.configs import TrossenAIMobileRobotConf
 from lerobot.common.robot_devices.robots.utils import get_arm_id
 from lerobot.common.robot_devices.utils import RobotDeviceAlreadyConnectedError, RobotDeviceNotConnectedError
 from lerobot.common.robot_devices.motors.dynamixel import TorqueMode
-
-def ensure_safe_goal_position(
-    goal_pos: torch.Tensor, present_pos: torch.Tensor, max_relative_target: float | list[float]
-):
-    # Cap relative action target magnitude for safety.
-    diff = goal_pos - present_pos
-    max_relative_target = torch.tensor(max_relative_target)
-    safe_diff = torch.minimum(diff, max_relative_target)
-    safe_diff = torch.maximum(safe_diff, -max_relative_target)
-    safe_goal_pos = present_pos + safe_diff
-
-    if not torch.allclose(goal_pos, safe_goal_pos):
-        logging.warning(
-            "Relative goal position magnitude had to be clamped to be safe.\n"
-            f"  requested relative goal position target: {diff}\n"
-            f"    clamped relative goal position target: {safe_diff}"
-        )
-
-    return safe_goal_pos
+from lerobot.common.robot_devices.robots.manipulator import ensure_safe_goal_position
 
 class TrossenAIMobile():
 
@@ -45,7 +27,7 @@ class TrossenAIMobile():
         self.follower_arms = make_motors_buses_from_configs(self.config.follower_arms)
         self.cameras = make_cameras_from_configs(self.config.cameras)
         self.is_connected = False
-        self.logs = {}
+        self.logs: dict[str, float] = {}
         self.base = slate.TrossenSlate()
         self.slate_base_data = slate.ChassisData()
 

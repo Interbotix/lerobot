@@ -814,4 +814,3 @@ class TrossenAIMobileRobotConfig(RobotConfig):
     )
 
     mock: bool = False
-    

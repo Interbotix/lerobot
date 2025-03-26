@@ -1,17 +1,24 @@
 import time
 from dataclasses import replace
-import torch
+
 import numpy as np
+import torch
 import trossen_slate as slate
+
 from lerobot.common.robot_devices.cameras.utils import make_cameras_from_configs
-from lerobot.common.robot_devices.motors.utils import MotorsBus, make_motors_buses_from_configs
-from lerobot.common.robot_devices.robots.utils import get_arm_id
-import logging
-from lerobot.common.robot_devices.robots.configs import TrossenAIMobileRobotConfig
-from lerobot.common.robot_devices.robots.utils import get_arm_id
-from lerobot.common.robot_devices.utils import RobotDeviceAlreadyConnectedError, RobotDeviceNotConnectedError
 from lerobot.common.robot_devices.motors.dynamixel import TorqueMode
+from lerobot.common.robot_devices.motors.utils import (
+    MotorsBus,
+    make_motors_buses_from_configs,
+)
+from lerobot.common.robot_devices.robots.configs import TrossenAIMobileRobotConfig
 from lerobot.common.robot_devices.robots.manipulator import ensure_safe_goal_position
+from lerobot.common.robot_devices.robots.utils import get_arm_id
+from lerobot.common.robot_devices.utils import (
+    RobotDeviceAlreadyConnectedError,
+    RobotDeviceNotConnectedError,
+)
+
 
 class TrossenAIMobile():
 
@@ -33,7 +40,7 @@ class TrossenAIMobile():
 
     def get_motor_names(self, arm: dict[str, MotorsBus]) -> list:
         return [f"{arm}_{motor}" for arm, bus in arm.items() for motor in bus.motors]
-    
+
     @property
     def camera_features(self) -> dict:
         cam_ft = {}
@@ -100,7 +107,7 @@ class TrossenAIMobile():
     def connect(self) -> None:
         if self.is_connected:
             raise RobotDeviceAlreadyConnectedError(
-                "TrossenAIMobileRobot is already connected. Do not run `robot.connect()` twice."
+                "TrossenAIMobile is already connected. Do not run `robot.connect()` twice."
             )
         self.base.init_base()
 
@@ -246,7 +253,7 @@ class TrossenAIMobile():
     def capture_observation(self):
         if not self.is_connected:
             raise RobotDeviceNotConnectedError(
-                "TrossenAIMobileRobot is not connected. You need to run `robot.connect()`."
+                "TrossenAIMobile is not connected. You need to run `robot.connect()`."
             )
 
         # Read follower position
@@ -293,7 +300,7 @@ class TrossenAIMobile():
     def send_action(self, action):
         if not self.is_connected:
             raise RobotDeviceNotConnectedError(
-                "TrossenAIMobileRobot is not connected. You need to run `robot.connect()`."
+                "TrossenAIMobile is not connected. You need to run `robot.connect()`."
             )
 
         from_idx = 0
@@ -331,7 +338,7 @@ class TrossenAIMobile():
     def disconnect(self):
         if not self.is_connected:
             raise RobotDeviceNotConnectedError(
-                "TrossenAIMobileRobot is not connected. You need to run `robot.connect()` before disconnecting."
+                "TrossenAIMobile is not connected. You need to run `robot.connect()` before disconnecting."
             )
         self.base.enable_motor_torque(False)
 

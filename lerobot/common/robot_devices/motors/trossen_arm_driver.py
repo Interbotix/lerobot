@@ -1,10 +1,14 @@
 import time
 import traceback
-import trossen_arm as trossen
-import numpy as np
 
-from lerobot.common.robot_devices.utils import RobotDeviceAlreadyConnectedError, RobotDeviceNotConnectedError
+import numpy as np
+import trossen_arm as trossen
+
 from lerobot.common.robot_devices.motors.configs import TrossenArmDriverConfig
+from lerobot.common.robot_devices.utils import (
+    RobotDeviceAlreadyConnectedError,
+    RobotDeviceNotConnectedError,
+)
 
 PITCH_CIRCLE_RADIUS = 0.00875 # meters
 VEL_LIMITS = [3.375, 3.375, 3.375, 7.0, 7.0, 7.0, 12.5 * PITCH_CIRCLE_RADIUS]
@@ -16,16 +20,15 @@ TROSSEN_ARM_MODELS = {
 
 class TrossenArmDriver:
     """
-        The `TrossenArmDriver` class provides an interface for controlling 
+        The `TrossenArmDriver` class provides an interface for controlling
         Trossen Robotics' robotic arms. It leverages the trossen_arm for communication with arms.
 
-        This class allows for configuration, torque management, and motion control of robotic arms. It includes features for handling connection states, moving the 
+        This class allows for configuration, torque management, and motion control of robotic arms. It includes features for handling connection states, moving the
         arm to specified poses, and logging timestamps for debugging and performance analysis.
 
         ### Key Features:
         - **Multi-motor Control:** Supports multiple motors connected to a bus.
-        - **Mode Switching:** Enables switching between position and gravity 
-        compensation modes.
+        - **Mode Switching:** Enables switching between position and gravity compensation modes.
         - **Home and Sleep Pose Management:** Automatically transitions the arm to home and sleep poses for safe operation.
         - **Error Handling:** Raises specific exceptions for connection and operational errors.
         - **Logging:** Captures timestamps for operations to aid in debugging.
@@ -89,7 +92,7 @@ class TrossenArmDriver:
 
         self.prev_write_time = 0
         self.current_write_time = None
-        
+
         # To prevent DiscontinuityError due to large jumps in position in short time.
         # We scale the time to move based on the distance between the start and goal values and the maximum speed of the motors.
         # The below factor is used to scale the time to move.
@@ -127,7 +130,7 @@ class TrossenArmDriver:
                 f"Failed to configure the driver for the {self.model} arm at {self.ip}."
             )
             raise
-        
+
         # Move the arms to the home pose
         self.driver.set_all_modes(trossen.Mode.position)
         self.driver.set_all_positions(self.home_pose, 2.0, False)
@@ -183,7 +186,7 @@ class TrossenArmDriver:
     def read(self, data_name, motor_names: str | list[str] | None = None):
         if not self.is_connected:
             raise RobotDeviceNotConnectedError(
-                f"TrossenArmMotorsBus({self.port}) is not connected. You need to run `motors_bus.connect()`."
+                f"TrossenArmDriver({self.ip}) is not connected. You need to run `motors_bus.connect()`."
             )
 
         start_time = time.perf_counter()
@@ -218,7 +221,7 @@ class TrossenArmDriver:
     def write(self, data_name, values: int | float | np.ndarray, motor_names: str | list[str] | None = None):
         if not self.is_connected:
             raise RobotDeviceNotConnectedError(
-                f"TrossenAIArm({self.port}) is not connected. You need to run `motors_bus.connect()`."
+                f"TrossenArmDriver({self.ip}) is not connected. You need to run `motors_bus.connect()`."
             )
 
         start_time = time.perf_counter()
@@ -251,7 +254,7 @@ class TrossenArmDriver:
     def disconnect(self):
         if not self.is_connected:
             raise RobotDeviceNotConnectedError(
-                f"Trossen Arm Driver ({self.port}) is not connected. Try running `motors_bus.connect()` first."
+                f"TrossenArmDriver ({self.ip}) is not connected. Try running `motors_bus.connect()` first."
             )
         self.driver.set_all_modes(trossen.Mode.position)
         self.driver.set_all_positions(self.home_pose, 2.0, False)

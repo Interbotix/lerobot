@@ -112,7 +112,6 @@ class TrossenAIMobile():
         return available_arms
 
     def teleop_safety_stop(self):
-        
         for arms in self.leader_arms:
             self.leader_arms[arms].write("Reset", 1)
         for arms in self.follower_arms:

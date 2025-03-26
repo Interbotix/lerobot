@@ -1,4 +1,4 @@
-This tutorial explains how to use [Trossen AI Bimanual](https://www.trossenrobotics.com/stationary-ai) with LeRobot.
+This tutorial explains how to use [Trossen AI Mobile](https://www.trossenrobotics.com/mobile-ai) with LeRobot.
 
 ## Setup
 
@@ -54,7 +54,7 @@ python lerobot/scripts/control_robot.py \
   --control.type=teleoperate
 ```
 
-By adding `--robot.max_relative_target=5`, we override the default value for `max_relative_target` defined in [`TrossenAIBimanualRobot`](lerobot/common/robot_devices/robots/configs.py). It is expected to be `5` to limit the magnitude of the movement for more safety, but the teleoperation won't be smooth. When you feel confident, you can disable this limit by adding `--robot.max_relative_target=null` to the command line:
+By adding `--robot.max_relative_target=5`, we override the default value for `max_relative_target` defined in [`TrossenAIMobilelRobot`](lerobot/common/robot_devices/robots/configs.py). It is expected to be `5` to limit the magnitude of the movement for more safety, but the teleoperation won't be smooth. When you feel confident, you can disable this limit by adding `--robot.max_relative_target=null` to the command line:
 
 ```bash
 python lerobot/scripts/control_robot.py \
@@ -91,13 +91,13 @@ python lerobot/scripts/control_robot.py \
   --control.type=record \
   --control.fps=30 \
   --control.single_task="Testing episode recording for Trossen AI Mobile." \
-  --control.repo_id=TXAI_MOBILE_01/trossen_ai_mobile_test \
+  --control.repo_id=${HF_USER}/trossen_ai_mobile_test \
   --control.tags='["tutorial"]' \
   --control.warmup_time_s=5 \
   --control.episode_time_s=30 \
-  --control.reset_time_s=3 \
+  --control.reset_time_s=30 \
   --control.num_episodes=2 \
-  --control.push_to_hub=false \
+  --control.push_to_hub=true \
   --control.num_image_writer_threads_per_camera=8 \
   --control.display_cameras=false
 ```
@@ -125,7 +125,7 @@ python lerobot/scripts/control_robot.py \
   --robot.max_relative_target=null \
   --control.type=replay \
   --control.fps=30 \
-  --control.repo_id=TXAI_MOBILE_01/trossen_ai_mobile_test \
+  --control.repo_id=${HF_USER}/trossen_ai_mobile_test \
   --control.episode=1 \
   --robot.enable_motor_torque=true
 ```

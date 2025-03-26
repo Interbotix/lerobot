@@ -10,7 +10,6 @@ import threading
 import logging
 import queue
 from lerobot.common.robot_devices.robots.configs import TrossenAIMobileRobotConfig
-from lerobot.common.robot_devices.robots.configs import ManipulatorRobotConfig
 from lerobot.common.robot_devices.robots.utils import get_arm_id
 from lerobot.common.robot_devices.utils import RobotDeviceAlreadyConnectedError, RobotDeviceNotConnectedError
 from lerobot.common.robot_devices.motors.dynamixel import TorqueMode
@@ -52,16 +51,11 @@ class TrossenAIMobile():
         self.logs = {}
 
         self.base = slate.TrossenSlate()
-        self.base.init_base()
-
-        self.read_data = False
 
         self.state_keys = None
         self.action_keys = None
 
-        self.log_data = slate.ChassisData()
-        self.update_thread = None
-        self.queue = None
+        self.slate_base_data = slate.ChassisData()
 
     def get_motor_names(self, arm: dict[str, MotorsBus]) -> list:
         return [f"{arm}_{motor}" for arm, bus in arm.items() for motor in bus.motors]
@@ -132,14 +126,14 @@ class TrossenAIMobile():
 
     def connect(self) -> None:
 
+        if self.is_connected:
+            raise RobotDeviceAlreadyConnectedError(
+                "TrossenAIMobileRobot is already connected. Do not run `robot.connect()` twice."
+            )
+        
         self.base.init_base()
 
         self.base.enable_motor_torque(self.enable_motor_torque)
-
-        if self.is_connected:
-            raise RobotDeviceAlreadyConnectedError(
-                "ManipulatorRobot is already connected. Do not run `robot.connect()` twice."
-            )
 
         if not self.leader_arms and not self.follower_arms and not self.cameras:
             raise ValueError(
@@ -180,20 +174,16 @@ class TrossenAIMobile():
 
         self.is_connected = True
 
-    # def update_values(self, queue):
-    #     while self.read_data:
-    #         self.base.update_state()
-    #         self.base.read(self.log_data)
 
-    def get_state(self) -> dict:
+    def get_base_state(self) -> dict:
         self.base.update_state()
-        self.base.read(self.log_data)
+        self.base.read(self.slate_base_data)
         return {
-            "odom_x": self.log_data.odom_x,
-            "odom_y": self.log_data.odom_y,
-            "odom_theta": self.log_data.odom_z,
-            "linear_vel": self.log_data.vel_x,
-            "angular_vel": self.log_data.vel_z,
+            "odom_x": self.slate_base_data.odom_x,
+            "odom_y": self.slate_base_data.odom_y,
+            "odom_theta": self.slate_base_data.odom_z,
+            "linear_vel": self.slate_base_data.vel_x,
+            "angular_vel": self.slate_base_data.vel_z,
         }
 
     def teleop_step(
@@ -233,9 +223,7 @@ class TrossenAIMobile():
             self.follower_arms[name].write("Goal_Position", goal_pos)
             self.logs[f"write_follower_{name}_goal_pos_dt_s"] = time.perf_counter() - before_fwrite_t
 
-        base_state = self.get_state()
-
-        print("Base State: ", base_state)
+        base_state = self.get_base_state()
        
         if not record_data:
             return
@@ -249,7 +237,7 @@ class TrossenAIMobile():
             self.logs[f"read_follower_{name}_pos_dt_s"] = time.perf_counter() - before_fread_t
 
         before_read_t = time.perf_counter()
-        base_state = self.get_state()
+        base_state = self.get_base_state()
         base_action = [base_state['linear_vel'], base_state['angular_vel']]
         self.logs["read_base_dt_s"] = time.perf_counter() - before_read_t
 
@@ -291,7 +279,7 @@ class TrossenAIMobile():
 
         if not self.is_connected:
             raise RobotDeviceNotConnectedError(
-                "ManipulatorRobot is not connected. You need to run `robot.connect()`."
+                "TrossenAIMobileRobot is not connected. You need to run `robot.connect()`."
             )
 
         # Read follower position
@@ -304,7 +292,7 @@ class TrossenAIMobile():
 
         # Read base state
         before_read_t = time.perf_counter()
-        base_state = self.get_state()
+        base_state = self.get_base_state()
         self.logs["read_base_dt_s"] = time.perf_counter() - before_read_t
 
         # Create state by concatenating follower current position
@@ -338,7 +326,7 @@ class TrossenAIMobile():
     def send_action(self, action):
         if not self.is_connected:
             raise RobotDeviceNotConnectedError(
-                "ManipulatorRobot is not connected. You need to run `robot.connect()`."
+                "TrossenAIMobileRobot is not connected. You need to run `robot.connect()`."
             )
 
         from_idx = 0
@@ -365,8 +353,6 @@ class TrossenAIMobile():
             self.follower_arms[name].write("Goal_Position", goal_pos)
 
         linear_vel, angular_vel = action.tolist()[-2:]
-        print("Linear Vel: ", linear_vel)
-        print("Angular Vel: ", angular_vel)
         before_write_t = time.perf_counter()
         self.base.set_cmd_vel(linear_vel, angular_vel)
         self.logs["write_base_dt_s"] = time.perf_counter() - before_write_t
@@ -378,7 +364,7 @@ class TrossenAIMobile():
     def disconnect(self):
         if not self.is_connected:
             raise RobotDeviceNotConnectedError(
-                "ManipulatorRobot is not connected. You need to run `robot.connect()` before disconnecting."
+                "TrossenAIMobileRobot is not connected. You need to run `robot.connect()` before disconnecting."
             )
         
         self.base.enable_motor_torque(False)
@@ -397,4 +383,5 @@ class TrossenAIMobile():
         self.is_connected = False
 
     def __del__(self):
-        self.disconnect()
+        if getattr(self, "is_connected", False):
+            self.disconnect()

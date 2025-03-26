@@ -126,7 +126,7 @@ class TrossenAIMobile():
 
         if not self.leader_arms and not self.follower_arms and not self.cameras:
             raise ValueError(
-                "ManipulatorRobot doesn't have any device to connect. See example of usage in docstring of the class."
+                "ManipulatorRobot doesn't have any device to connect."
             )
 
         # Connect the arms
@@ -211,7 +211,6 @@ class TrossenAIMobile():
             self.follower_arms[name].write("Goal_Position", goal_pos)
             self.logs[f"write_follower_{name}_goal_pos_dt_s"] = time.perf_counter() - before_fwrite_t
 
-        base_state = self.get_base_state()
         if not record_data:
             return
 
@@ -228,7 +227,7 @@ class TrossenAIMobile():
         base_action = [base_state['linear_vel'], base_state['angular_vel']]
         self.logs["read_base_dt_s"] = time.perf_counter() - before_read_t
 
-        # Create state by concatenating follower current position
+        # Create state by concatenating follower current position and base state
         state = []
         for name in self.follower_arms:
             if name in follower_pos:
@@ -236,7 +235,7 @@ class TrossenAIMobile():
         state.append(torch.as_tensor(list(base_state.values())))
         state = torch.cat(state)
 
-        # Create action by concatenating follower goal position
+        # Create action by concatenating follower goal position and base action
         action = []
         for name in self.follower_arms:
             if name in follower_goal_pos:

@@ -17,6 +17,7 @@ from lerobot.common.robot_devices.robots.utils import get_arm_id
 from lerobot.common.robot_devices.utils import (
     RobotDeviceAlreadyConnectedError,
     RobotDeviceNotConnectedError,
+    SystemState,
 )
 
 
@@ -112,13 +113,16 @@ class TrossenAIMobile():
         success, result = self.base.init_base()
         if not success:
             raise RobotDeviceNotConnectedError(
-                f"{result}.\nMake sure the robot is powered on and connected to the computer.\nEnsure no error messages are displayed on the base screen."
+                f"{result}.\nMake sure the robot is powered on and connected to the computer. \n{self.check_base_state()[0]}"
             )
-
+        if self.check_base_state()[1]==SystemState.SYS_ESTOP:
+            raise RuntimeError(
+                f"Robot is in emergency stop state. Please release the emergency stop button and try again"
+            )
         success, result = self.base.enable_motor_torque(self.enable_motor_torque)
         if not success:
             raise RuntimeError(
-                f"Failed to enable motor torque.\n{result}."
+                f"Failed to enable motor torque.\n{result}.\n{self.check_base_state()[0]}"
             )
 
         if not self.leader_arms and not self.follower_arms and not self.cameras:
@@ -158,6 +162,21 @@ class TrossenAIMobile():
             self.cameras[name].connect()
 
         self.is_connected = True
+
+
+    def check_base_state(self) -> str:
+        success = self.base.update_state()
+        if not success:
+            return "Failed to get base state. Make sure the robot is connected."
+            
+        self.base.read(self.slate_base_data)
+        state_code = self.slate_base_data.system_state
+        try:
+            state_name = SystemState(state_code).name
+        except ValueError:
+            state_name = f"UNKNOWN_STATE (code: {state_code})"
+
+        return (f"System State: {state_name}"), state_code
 
 
     def get_base_state(self) -> dict:

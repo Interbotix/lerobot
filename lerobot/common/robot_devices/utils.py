@@ -16,7 +16,7 @@ from enum import IntEnum
 import platform
 import time
 
-class BaseSystemState(IntEnum):
+class SlateBaseSystemState(IntEnum):
     SYS_INIT = 0x00
     SYS_NORMAL = 0x01
     SYS_REMOTE = 0x02

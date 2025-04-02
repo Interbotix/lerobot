@@ -109,7 +109,11 @@ class TrossenAIMobile():
             raise RobotDeviceAlreadyConnectedError(
                 "TrossenAIMobile is already connected. Do not run `robot.connect()` twice."
             )
-        self.base.init_base()
+        success, result = self.base.init_base()
+        if not success:
+            raise RuntimeError(
+                f"{result}.\nMake sure the robot is powered on and connected to the computer.\nEnsure no error messages are displayed on the base screen."
+            )
 
         self.base.enable_motor_torque(self.enable_motor_torque)
 

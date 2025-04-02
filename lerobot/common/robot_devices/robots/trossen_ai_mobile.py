@@ -113,7 +113,7 @@ class TrossenAIMobile():
         success, result = self.base.init_base()
         if not success:
             raise RobotDeviceNotConnectedError(
-                f"{result}.\nMake sure the robot is powered on and connected to the computer. \n{self.check_base_state()[0]}"
+                f"{result}.\nMake sure the robot is powered on and connected to the computer.\n{self.check_base_state()[0]}"
             )
         if self.check_base_state()[1]==SystemState.SYS_ESTOP:
             raise RuntimeError(
@@ -167,7 +167,7 @@ class TrossenAIMobile():
     def check_base_state(self) -> str:
         success = self.base.update_state()
         if not success:
-            return "Failed to get base state. Make sure the robot is connected."
+            return "Failed to get base state. Make sure the robot is powered on and connected to the computer."
             
         self.base.read(self.slate_base_data)
         state_code = self.slate_base_data.system_state
@@ -176,14 +176,14 @@ class TrossenAIMobile():
         except ValueError:
             state_name = f"UNKNOWN_STATE (code: {state_code})"
 
-        return (f"System State: {state_name}"), state_code
+        return f"System State: {state_name}", state_code
 
 
     def get_base_state(self) -> dict:
         success = self.base.update_state()
         if not success:
             raise RobotDeviceNotConnectedError(
-                "Failed to get base state. Make sure the robot is connected."
+                "Failed to get base state. Make sure the robot is powered on and connected to the computer."
             )
         self.base.read(self.slate_base_data)
         return {
@@ -362,7 +362,7 @@ class TrossenAIMobile():
         success = self.base.set_cmd_vel(linear_vel, angular_vel)
         if not success:
             raise RobotDeviceNotConnectedError(
-                "Failed to send action to base slate. Make sure the base slate is connected."
+                "Failed to send action to base slate. Make sure the robot is powered on and connected to the computer."
             )
         self.logs["write_base_dt_s"] = time.perf_counter() - before_write_t
 

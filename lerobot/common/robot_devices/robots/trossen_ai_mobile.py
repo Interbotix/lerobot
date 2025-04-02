@@ -111,11 +111,15 @@ class TrossenAIMobile():
             )
         success, result = self.base.init_base()
         if not success:
-            raise RuntimeError(
+            raise RobotDeviceNotConnectedError(
                 f"{result}.\nMake sure the robot is powered on and connected to the computer.\nEnsure no error messages are displayed on the base screen."
             )
 
-        self.base.enable_motor_torque(self.enable_motor_torque)
+        success, result = self.base.enable_motor_torque(self.enable_motor_torque)
+        if not success:
+            raise RuntimeError(
+                f"Failed to enable motor torque.\n{result}."
+            )
 
         if not self.leader_arms and not self.follower_arms and not self.cameras:
             raise ValueError(
@@ -157,7 +161,11 @@ class TrossenAIMobile():
 
 
     def get_base_state(self) -> dict:
-        self.base.update_state()
+        success = self.base.update_state()
+        if not success:
+            raise RobotDeviceNotConnectedError(
+                "Failed to get base state. Make sure the robot is connected."
+            )
         self.base.read(self.slate_base_data)
         return {
             "odom_x": self.slate_base_data.odom_x,
@@ -332,7 +340,11 @@ class TrossenAIMobile():
 
         linear_vel, angular_vel = action.tolist()[-2:]
         before_write_t = time.perf_counter()
-        self.base.set_cmd_vel(linear_vel, angular_vel)
+        success = self.base.set_cmd_vel(linear_vel, angular_vel)
+        if not success:
+            raise RobotDeviceNotConnectedError(
+                "Failed to send action to base slate. Make sure the base slate is connected."
+            )
         self.logs["write_base_dt_s"] = time.perf_counter() - before_write_t
 
         action_sent.append(action[-2:])
@@ -344,7 +356,11 @@ class TrossenAIMobile():
             raise RobotDeviceNotConnectedError(
                 "TrossenAIMobile is not connected. You need to run `robot.connect()` before disconnecting."
             )
-        self.base.enable_motor_torque(False)
+        success, result = self.base.enable_motor_torque(False)
+        if not success:
+            raise RuntimeError(
+                f"Failed to disable motor torque.\n{result}."
+            )
 
         for name in self.follower_arms:
             self.follower_arms[name].disconnect()

@@ -630,6 +630,8 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
     # then to gradually add more motors (by uncommenting), until you can teleoperate both arms fully
     max_relative_target: int | None = 5
 
+    force_feedback_gain: float = 0.1
+
     leader_arms: dict[str, MotorsBusConfig] = field(
         default_factory=lambda: {
             "left": TrossenArmDriverConfig(
@@ -653,7 +655,7 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
             ),
             "right": TrossenArmDriverConfig(
                 ip="192.168.1.4",
-                model = "V0_FOLLOWER",
+                model="V0_FOLLOWER",
             ),
         }
     )

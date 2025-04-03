@@ -192,6 +192,8 @@ class TrossenArmDriver:
             values = self.driver.get_positions()
             values[:-1] = np.degrees(values[:-1])  # Convert all joints except gripper
             values[-1] = values[-1] * 10000  # Convert gripper to range (0-450)
+        elif data_name == "External_Efforts":
+            values = self.driver.get_external_efforts()
         else:
             values = None
             print(f"Data name: {data_name} is not supported for reading.")
@@ -233,6 +235,8 @@ class TrossenArmDriver:
             self.driver.set_all_velocities([0.0] * self.driver.get_num_joints(), 0.0, False)
             self.driver.set_all_modes(trossen.Mode.position)
             self.driver.set_all_positions(self.home_pose, 2.0, False)
+        elif data_name == "External_Efforts":
+            self.driver.set_all_external_efforts(values, 0.0, False)
         else:
             print(f"Data name: {data_name} value: {values} is not supported for writing.")
 

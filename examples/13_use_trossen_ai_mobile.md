@@ -60,7 +60,7 @@ python lerobot/scripts/control_robot.py \
   --robot.max_relative_target=null \
   --control.type=teleoperate
 ```
-By adding `--robot.force_feedback_gain=0.1`, we override the default value for `force_feedback_gain` defined in [`TrossenAIMobileRobot`](lerobot/common/robot_devices/robots/configs.py). This enables **force feedback** from the follower arm to the leader arm — meaning the user can **feel contact forces** when the robot interacts with external objects (e.g., gripping or bumping into something). A typical starting value is `0.1` for a responsive feel. You can disable this behavior entirely by setting `--robot.force_feedback_gain=0.0` in the command line:
+By adding `--robot.force_feedback_gain=0.1`, we override the default value for `force_feedback_gain` defined in [`TrossenAIMobileRobot`](lerobot/common/robot_devices/robots/configs.py). This enables **force feedback** from the follower arm to the leader arm — meaning the user can **feel contact forces** when the robot interacts with external objects (e.g., gripping or bumping into something). A typical starting value is `0.1` for a responsive feel. The default value is `0.0`, which disables force feedback. :
 
 ```bash
 python lerobot/scripts/control_robot.py \
@@ -110,17 +110,17 @@ python lerobot/scripts/control_robot.py \
   --control.display_cameras=false
 ```
 
-The **Slate base** works in two modes:
+The **SLATE base** works in two modes:
 - **Torque OFF** (default): You can push the base around manually.
-- **Torque ON**: Enables the motors so you can control the base using the **Slate remote controller**.
+- **Torque ON**: Enables the motors so you can control the base using the **SLATE remote controller**.
 
 To enable torque-on mode during recording, add the following argument:
 ```bash
 --robot.enable_motor_torque=true
 ```
 
-For more information about the Slate remote controller, refer to the official documentation:
-[Slate RC Controller Guide](https://docs.trossenrobotics.com/slate_docs/operation/rc_controller.html)
+For more information about the SLATE remote controller, refer to the official documentation:
+[SLATE RC Controller Guide](https://docs.trossenrobotics.com/slate_docs/operation/rc_controller.html)
 
 
 ## Visualize a dataset
@@ -198,7 +198,6 @@ python lerobot/scripts/control_robot.py \
 ```
 
 Note: For evaluation, you need to turn on motor torque using ``--robot.enable_motor_torque=true``, so that the robot can actively follow the trajectory instead of remaining in a passive (torque-off) state.
-
 
 As you can see, it's almost the same command as previously used to record your training dataset. Two things changed:
 1. There is an additional `--control.policy.path` argument which indicates the path to your policy checkpoint with  (e.g. `outputs/train/eval_act_trossen_ai_mobile_test/checkpoints/last/pretrained_model`). You can also use the model repository if you uploaded a model checkpoint to the hub (e.g. `${HF_USER}/act_trossen_ai_mobile_test`).

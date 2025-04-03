@@ -630,7 +630,7 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
     # then to gradually add more motors (by uncommenting), until you can teleoperate both arms fully
     max_relative_target: int | None = 5
 
-    force_feedback_gain: float = 0.1
+    force_feedback_gain: float = 0.0
 
     leader_arms: dict[str, MotorsBusConfig] = field(
         default_factory=lambda: {
@@ -711,6 +711,8 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
     # then to gradually add more motors (by uncommenting), until you can teleoperate both arms fully
     max_relative_target: int | None = 5
 
+    force_feedback_gain: float = 0.0
+
     leader_arms: dict[str, MotorsBusConfig] = field(
         default_factory=lambda: {
             "main": TrossenArmDriverConfig(
@@ -756,8 +758,10 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
 @RobotConfig.register_subclass("trossen_ai_mobile")
 @dataclass
 class TrossenAIMobileRobotConfig(RobotConfig):
-    
+
     max_relative_target: int | None = 5
+
+    force_feedback_gain: float = 0.0
 
     enable_motor_torque: bool = False
 
@@ -784,7 +788,7 @@ class TrossenAIMobileRobotConfig(RobotConfig):
             ),
             "right": TrossenArmDriverConfig(
                 ip="192.168.1.4",
-                model = "V0_FOLLOWER",
+                model="V0_FOLLOWER",
             ),
         }
     )

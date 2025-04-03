@@ -87,14 +87,6 @@ class TrossenArmDriver:
                     "joint_6": [7, "4310"],
                 }
 
-        self.prev_write_time = 0
-        self.current_write_time = None
-
-        # To prevent DiscontinuityError due to large jumps in position in short time.
-        # We scale the time to move based on the distance between the start and goal values and the maximum speed of the motors.
-        # The below factor is used to scale the time to move.
-        self.TIME_SCALING_FACTOR = 3.0
-
         # Minimum time to move for the arm (This is a tuning parameter)
         self.MIN_TIME_TO_MOVE = 3.0 / self.fps
 
@@ -220,7 +212,6 @@ class TrossenArmDriver:
             values[:-1] = np.radians(values[:-1])  # Convert all joints except gripper
             values[-1] = values[-1] / 10000  # Convert gripper back to range (0-0.045)
             self.driver.set_all_positions(values.tolist(), self.MIN_TIME_TO_MOVE, False)
-            self.prev_write_time = self.current_write_time
 
         # Enable or disable the torque of the motors
         elif data_name == "Torque_Enable":

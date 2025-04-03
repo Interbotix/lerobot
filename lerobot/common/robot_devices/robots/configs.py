@@ -630,6 +630,9 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
     # then to gradually add more motors (by uncommenting), until you can teleoperate both arms fully
     max_relative_target: int | None = 5
 
+    # Gain applied to external efforts sensed on the follower arm and transmitted to the leader arm.
+    # This enables the user to feel external forces (e.g., contact with objects) through force feedback.
+    # A value of 0.0 disables force feedback. A good starting value for a responsive experience is 0.1.
     force_feedback_gain: float = 0.0
 
     leader_arms: dict[str, MotorsBusConfig] = field(
@@ -711,6 +714,9 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
     # then to gradually add more motors (by uncommenting), until you can teleoperate both arms fully
     max_relative_target: int | None = 5
 
+    # Gain applied to external efforts sensed on the follower arm and transmitted to the leader arm.
+    # This enables the user to feel external forces (e.g., contact with objects) through force feedback.
+    # A value of 0.0 disables force feedback. A good starting value for a responsive experience is 0.1.
     force_feedback_gain: float = 0.0
 
     leader_arms: dict[str, MotorsBusConfig] = field(
@@ -759,8 +765,21 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
 @dataclass
 class TrossenAIMobileRobotConfig(RobotConfig):
 
+    # /!\ FOR SAFETY, READ THIS /!\
+    # `max_relative_target` limits the magnitude of the relative positional target vector for safety purposes.
+    # Set this to a positive scalar to have the same value for all motors, or a list that is the same length as
+    # the number of motors in your follower arms.
+    # For Trossen AI Arms, for every goal position request, motor rotations are capped at 5 degrees by default.
+    # When you feel more confident with teleoperation or running the policy, you can extend
+    # this safety limit and even removing it by setting it to `null`.
+    # Also, everything is expected to work safely out-of-the-box, but we highly advise to
+    # first try to teleoperate the grippers only (by commenting out the rest of the motors in this yaml),
+    # then to gradually add more motors (by uncommenting), until you can teleoperate both arms fully
     max_relative_target: int | None = 5
 
+    # Gain applied to external efforts sensed on the follower arm and transmitted to the leader arm.
+    # This enables the user to feel external forces (e.g., contact with objects) through force feedback.
+    # A value of 0.0 disables force feedback. A good starting value for a responsive experience is 0.1.
     force_feedback_gain: float = 0.0
 
     enable_motor_torque: bool = False

@@ -1,4 +1,5 @@
 import time
+from typing import Tuple
 from dataclasses import replace
 
 import numpy as np
@@ -19,8 +20,6 @@ from lerobot.common.robot_devices.utils import (
     RobotDeviceNotConnectedError,
     SlateBaseSystemState,
 )
-from typing import Tuple
-
 
 class TrossenAIMobile():
 

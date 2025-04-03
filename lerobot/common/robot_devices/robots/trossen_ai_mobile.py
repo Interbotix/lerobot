@@ -1,6 +1,6 @@
 import time
-from typing import Tuple
 from dataclasses import replace
+from typing import Tuple
 
 import numpy as np
 import torch
@@ -21,8 +21,8 @@ from lerobot.common.robot_devices.utils import (
     SlateBaseSystemState,
 )
 
-class TrossenAIMobile():
 
+class TrossenAIMobile:
     def __init__(self, config: TrossenAIMobileRobotConfig | None = None, **kwargs):
         if config is None:
             self.config = TrossenAIMobileRobotConfig(**kwargs)
@@ -56,8 +56,10 @@ class TrossenAIMobile():
 
     @property
     def motor_features(self) -> dict:
-        action_names = ['linear_vel', 'angular_vel'] + self.get_motor_names(self.leader_arms)
-        state_names = ['odom_x', 'odom_y', 'odom_theta', 'linear_vel', 'angular_vel'] + self.get_motor_names(self.leader_arms)
+        action_names = ["linear_vel", "angular_vel"] + self.get_motor_names(self.leader_arms)
+        state_names = ["odom_x", "odom_y", "odom_theta", "linear_vel", "angular_vel"] + self.get_motor_names(
+            self.leader_arms
+        )
         return {
             "action": {
                 "dtype": "float32",
@@ -116,25 +118,19 @@ class TrossenAIMobile():
                 f"{result}.\nMake sure the robot is powered on and connected to the computer.\n{self.check_base_state()[0]}"
             )
         try:
-            if self.check_base_state()[1]==SlateBaseSystemState.SYS_ESTOP:
+            if self.check_base_state()[1] == SlateBaseSystemState.SYS_ESTOP:
                 raise RuntimeError(
-                    f"Robot is in emergency stop state. Please release the emergency stop button and try again"
+                    "Robot is in emergency stop state. Please release the emergency stop button and try again"
                 )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to check base state.\n{e}."
-            )
+            raise RuntimeError(f"Failed to check base state.\n{e}.") from e
 
         success, result = self.base.enable_motor_torque(self.enable_motor_torque)
         if not success:
-            raise RuntimeError(
-                f"Failed to enable motor torque.\n{result}.\n{self.check_base_state()[0]}"
-            )
+            raise RuntimeError(f"Failed to enable motor torque.\n{result}.\n{self.check_base_state()[0]}")
 
         if not self.leader_arms and not self.follower_arms and not self.cameras:
-            raise ValueError(
-                "ManipulatorRobot doesn't have any device to connect."
-            )
+            raise ValueError("ManipulatorRobot doesn't have any device to connect.")
 
         # Connect the arms
         for name in self.follower_arms:
@@ -169,12 +165,13 @@ class TrossenAIMobile():
 
         self.is_connected = True
 
-
     def check_base_state(self) -> Tuple[str, SlateBaseSystemState]:
         success = self.base.update_state()
         if not success:
-            return "Failed to get base state. Make sure the robot is powered on and connected to the computer."
-            
+            return (
+                "Failed to get base state. Make sure the robot is powered on and connected to the computer."
+            )
+
         self.base.read(self.slate_base_data)
         state_code = self.slate_base_data.system_state
         try:
@@ -183,7 +180,6 @@ class TrossenAIMobile():
             state_name = f"UNKNOWN_STATE (code: {state_code})"
 
         return state_name, state_code
-
 
     def get_base_state(self) -> dict:
         success = self.base.update_state()
@@ -203,7 +199,6 @@ class TrossenAIMobile():
     def teleop_step(
         self, record_data=False
     ) -> None | tuple[dict[str, torch.Tensor], dict[str, torch.Tensor]]:
-
         if not self.is_connected:
             raise RobotDeviceNotConnectedError(
                 "TrossenAIMobile is not connected. You need to run `robot.connect()`."
@@ -250,7 +245,7 @@ class TrossenAIMobile():
 
         before_read_t = time.perf_counter()
         base_state = self.get_base_state()
-        base_action = [base_state['linear_vel'], base_state['angular_vel']]
+        base_action = [base_state["linear_vel"], base_state["angular_vel"]]
         self.logs["read_base_dt_s"] = time.perf_counter() - before_read_t
 
         # Create state by concatenating follower current position and base state
@@ -383,9 +378,7 @@ class TrossenAIMobile():
             )
         success, result = self.base.enable_motor_torque(False)
         if not success:
-            raise RuntimeError(
-                f"Failed to disable motor torque.\n{result}."
-            )
+            raise RuntimeError(f"Failed to disable motor torque.\n{result}.")
 
         for name in self.follower_arms:
             self.follower_arms[name].disconnect()

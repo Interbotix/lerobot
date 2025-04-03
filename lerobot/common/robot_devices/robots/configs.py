@@ -617,7 +617,6 @@ class LeKiwiRobotConfig(RobotConfig):
 @RobotConfig.register_subclass("trossen_ai_stationary")
 @dataclass
 class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
-
     # /!\ FOR SAFETY, READ THIS /!\
     # `max_relative_target` limits the magnitude of the relative positional target vector for safety purposes.
     # Set this to a positive scalar to have the same value for all motors, or a list that is the same length as
@@ -701,7 +700,6 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
 @RobotConfig.register_subclass("trossen_ai_solo")
 @dataclass
 class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
-
     # /!\ FOR SAFETY, READ THIS /!\
     # `max_relative_target` limits the magnitude of the relative positional target vector for safety purposes.
     # Set this to a positive scalar to have the same value for all motors, or a list that is the same length as
@@ -764,7 +762,6 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
 @RobotConfig.register_subclass("trossen_ai_mobile")
 @dataclass
 class TrossenAIMobileRobotConfig(RobotConfig):
-
     # /!\ FOR SAFETY, READ THIS /!\
     # `max_relative_target` limits the magnitude of the relative positional target vector for safety purposes.
     # Set this to a positive scalar to have the same value for all motors, or a list that is the same length as

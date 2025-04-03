@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from enum import IntEnum
 import platform
 import time
+from enum import IntEnum
+
 
 class SlateBaseSystemState(IntEnum):
     SYS_INIT = 0x00
@@ -34,6 +35,7 @@ class SlateBaseSystemState(IntEnum):
     SYS_ERR_OVER_VOLTAGE = 0x16
     SYS_ERR_OVER_CURRENT = 0x17
     SYS_ERR_OVER_TEMP = 0x18
+
 
 def busy_wait(seconds):
     if platform.system() == "Darwin":

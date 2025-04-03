@@ -24,9 +24,9 @@ from lerobot.common.robot_devices.robots.configs import (
     RobotConfig,
     So100RobotConfig,
     StretchRobotConfig,
-    TrossenAIStationaryRobotConfig,
-    TrossenAISoloRobotConfig,
     TrossenAIMobileRobotConfig,
+    TrossenAISoloRobotConfig,
+    TrossenAIStationaryRobotConfig,
 )
 
 

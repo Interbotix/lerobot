@@ -87,7 +87,7 @@ class TrossenArmDriver:
                     "joint_6": [7, "4310"],
                 }
 
-        # Minimum time to move for the arm (This is a tuning parameter)
+        # Minimum time to move for the arm
         self.MIN_TIME_TO_MOVE = 3.0 / self.fps
 
     def connect(self):

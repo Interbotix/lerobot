@@ -10,13 +10,11 @@ from lerobot.common.robot_devices.utils import (
     RobotDeviceNotConnectedError,
 )
 
-PITCH_CIRCLE_RADIUS = 0.00875 # meters
-VEL_LIMITS = [3.375, 3.375, 3.375, 7.0, 7.0, 7.0, 12.5 * PITCH_CIRCLE_RADIUS]
-
 TROSSEN_ARM_MODELS = {
     "V0_LEADER": [trossen.Model.wxai_v0, trossen.StandardEndEffector.wxai_v0_leader],
     "V0_FOLLOWER": [trossen.Model.wxai_v0, trossen.StandardEndEffector.wxai_v0_follower],
 }
+
 
 class TrossenArmDriver:
     """
@@ -63,7 +61,6 @@ class TrossenArmDriver:
         ```
     """
 
-
     def __init__(
         self,
         config: TrossenArmDriverConfig,
@@ -79,7 +76,7 @@ class TrossenArmDriver:
         self.home_pose = [0, np.pi/3, np.pi/6, np.pi/5, 0, 0, 0]
         self.sleep_pose = [0, 0, 0, 0, 0, 0, 0]
 
-        self.motors={
+        self.motors = {
                     # name: (index, model)
                     "joint_0": [1, "4340"],
                     "joint_1": [2, "4340"],
@@ -138,7 +135,6 @@ class TrossenArmDriver:
         # Allow to read and write
         self.is_connected = True
 
-
     def reconnect(self):
         try:
             model_name, model_end_effector = TROSSEN_ARM_MODELS[self.model]
@@ -154,7 +150,6 @@ class TrossenArmDriver:
             raise
 
         self.is_connected = True
-
 
     @property
     def motor_names(self) -> list[str]:
@@ -208,16 +203,6 @@ class TrossenArmDriver:
         values = np.array(values, dtype=np.float32)
         return values
 
-    def compute_time_to_move(self, goal_values: np.ndarray):
-        # Compute the time to move based on the distance between the start and goal values
-        # and the maximum speed of the motors
-        current_pose = self.driver.get_positions()
-        displacement = abs(goal_values - current_pose)
-        time_to_move_all_joints = self.TIME_SCALING_FACTOR*displacement / VEL_LIMITS
-        time_to_move = max(time_to_move_all_joints)
-        time_to_move = max(time_to_move, self.MIN_TIME_TO_MOVE)
-        return time_to_move
-
     def write(self, data_name, values: int | float | np.ndarray, motor_names: str | list[str] | None = None):
         if not self.is_connected:
             raise RobotDeviceNotConnectedError(
@@ -232,7 +217,7 @@ class TrossenArmDriver:
             # Convert back to radians for joints
             values[:-1] = np.radians(values[:-1])  # Convert all joints except gripper
             values[-1] = values[-1] / 10000  # Convert gripper back to range (0-0.045)
-            self.driver.set_all_positions(values.tolist(), self.compute_time_to_move(values), False)
+            self.driver.set_all_positions(values.tolist(), self.MIN_TIME_TO_MOVE, False)
             self.prev_write_time = self.current_write_time
 
         # Enable or disable the torque of the motors

@@ -25,24 +25,22 @@ rm ~/miniconda3/miniconda.sh
 conda create -y -n lerobot python=3.10 && conda activate lerobot
 ```
 
-4. Clone LeRobot:
+4. Install ffmpeg for miniconda
+```bash
+conda install -c conda-forge 'ffmpeg>=7.0' -y
+```
+
+5. Clone LeRobot:
 ```bash
 git clone -b trossen-ai https://github.com/Interbotix/lerobot.git ~/lerobot
 ```
 
-5. Install LeRobot with dependencies for the Trossen AI arms (trossen-arm) and cameras (intelrealsense):
+6. Install LeRobot with dependencies for the Trossen AI arms (trossen-arm) and cameras (pyrealsense2):
 
 ```bash
 cd ~/lerobot && pip install -e ".[trossen_ai]"
 ```
 
-For Linux only (not Mac), install extra dependencies for recording datasets:
-
-```bash
-conda install -y -c conda-forge ffmpeg
-pip uninstall -y opencv-python
-conda install -y -c conda-forge "opencv>=4.10.0"
-```
 
 ## Teleoperate
 
@@ -54,7 +52,7 @@ python lerobot/scripts/control_robot.py \
   --control.type=teleoperate
 ```
 
-By adding `--robot.max_relative_target=5`, we override the default value for `max_relative_target` defined in [`TrossenAIMobilelRobot`](lerobot/common/robot_devices/robots/configs.py). It is expected to be `5` to limit the magnitude of the movement for more safety, but the teleoperation won't be smooth. When you feel confident, you can disable this limit by adding `--robot.max_relative_target=null` to the command line:
+By adding `--robot.max_relative_target=5`, we override the default value for `max_relative_target` defined in [`TrossenAIMobilelRobot`](../lerobot/common/robot_devices/robots/configs.py). It is expected to be `5` to limit the magnitude of the movement for more safety, but the teleoperation won't be smooth. When you feel confident, you can disable this limit by adding `--robot.max_relative_target=null` to the command line:
 
 ```bash
 python lerobot/scripts/control_robot.py \
@@ -62,6 +60,16 @@ python lerobot/scripts/control_robot.py \
   --robot.max_relative_target=null \
   --control.type=teleoperate
 ```
+By adding `--robot.force_feedback_gain=0.1`, we override the default value for `force_feedback_gain` defined in [`TrossenAIMobileRobot`](../lerobot/common/robot_devices/robots/configs.py). This enables **force feedback** from the follower arm to the leader arm — meaning the user can **feel contact forces** when the robot interacts with external objects (e.g., gripping or bumping into something). A typical starting value is `0.1` for a responsive feel. The default value is `0.0`, which disables force feedback.
+
+```bash
+python lerobot/scripts/control_robot.py \
+  --robot.type=trossen_ai_mobile \
+  --robot.max_relative_target=null \
+  --robot.force_feedback_gain=0.1 \
+  --control.type=teleoperate
+```
+This parameter can be used in both teleoperate and record modes, depending on whether you want the operator to feel contact feedback during data collection.
 
 ## Record a dataset
 
@@ -102,6 +110,18 @@ python lerobot/scripts/control_robot.py \
   --control.display_cameras=false
 ```
 
+The **SLATE base** works in two modes:
+- **Torque OFF** (default): You can push the base around manually.
+- **Torque ON**: Enables the motors so you can control the base using the **SLATE remote controller**.
+
+To enable torque-on mode during recording, add the following argument:
+```bash
+--robot.enable_motor_torque=true
+```
+
+For more information about the SLATE remote controller, refer to the official documentation:
+[SLATE RC Controller Guide](https://docs.trossenrobotics.com/slate_docs/operation/rc_controller.html)
+
 ## Visualize a dataset
 
 If you uploaded your dataset to the hub with `--control.push_to_hub=true`, you can [visualize your dataset online](https://huggingface.co/spaces/lerobot/visualize_dataset) by copy pasting your repo id given by:
@@ -129,6 +149,8 @@ python lerobot/scripts/control_robot.py \
   --control.episode=1 \
   --robot.enable_motor_torque=true
 ```
+
+Note: For replaying an episode, you need to turn on motor torque using ``--robot.enable_motor_torque=true``, so that the robot can actively follow the trajectory instead of remaining in a passive (torque-off) state.
 
 ## Train a policy
 
@@ -170,8 +192,11 @@ python lerobot/scripts/control_robot.py \
   --control.num_episodes=10 \
   --control.push_to_hub=true \
   --control.policy.path=outputs/train/act_trossen_ai_mobile_test/checkpoints/last/pretrained_model \
-  --control.num_image_writer_processes=1
+  --control.num_image_writer_processes=1 \
+  --robot.enable_motor_torque=true
 ```
+
+Note: For evaluation, you need to turn on motor torque using ``--robot.enable_motor_torque=true``, so that the robot can actively follow the trajectory instead of remaining in a passive (torque-off) state.
 
 As you can see, it's almost the same command as previously used to record your training dataset. Two things changed:
 1. There is an additional `--control.policy.path` argument which indicates the path to your policy checkpoint with  (e.g. `outputs/train/eval_act_trossen_ai_mobile_test/checkpoints/last/pretrained_model`). You can also use the model repository if you uploaded a model checkpoint to the hub (e.g. `${HF_USER}/act_trossen_ai_mobile_test`).

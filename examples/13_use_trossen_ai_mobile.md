@@ -35,7 +35,7 @@ conda install -c conda-forge 'ffmpeg>=7.0' -y
 git clone -b trossen-ai https://github.com/Interbotix/lerobot.git ~/lerobot
 ```
 
-6. Install LeRobot with dependencies for the Trossen AI arms (trossen-arm) and cameras (intelrealsense):
+6. Install LeRobot with dependencies for the Trossen AI arms (trossen-arm) and cameras (pyrealsense2):
 
 ```bash
 cd ~/lerobot && pip install -e ".[trossen_ai]"
@@ -52,7 +52,7 @@ python lerobot/scripts/control_robot.py \
   --control.type=teleoperate
 ```
 
-By adding `--robot.max_relative_target=5`, we override the default value for `max_relative_target` defined in [`TrossenAIMobilelRobot`](lerobot/common/robot_devices/robots/configs.py). It is expected to be `5` to limit the magnitude of the movement for more safety, but the teleoperation won't be smooth. When you feel confident, you can disable this limit by adding `--robot.max_relative_target=null` to the command line:
+By adding `--robot.max_relative_target=5`, we override the default value for `max_relative_target` defined in [`TrossenAIMobilelRobot`](../lerobot/common/robot_devices/robots/configs.py). It is expected to be `5` to limit the magnitude of the movement for more safety, but the teleoperation won't be smooth. When you feel confident, you can disable this limit by adding `--robot.max_relative_target=null` to the command line:
 
 ```bash
 python lerobot/scripts/control_robot.py \
@@ -60,7 +60,7 @@ python lerobot/scripts/control_robot.py \
   --robot.max_relative_target=null \
   --control.type=teleoperate
 ```
-By adding `--robot.force_feedback_gain=0.1`, we override the default value for `force_feedback_gain` defined in [`TrossenAIMobileRobot`](lerobot/common/robot_devices/robots/configs.py). This enables **force feedback** from the follower arm to the leader arm — meaning the user can **feel contact forces** when the robot interacts with external objects (e.g., gripping or bumping into something). A typical starting value is `0.1` for a responsive feel. The default value is `0.0`, which disables force feedback.
+By adding `--robot.force_feedback_gain=0.1`, we override the default value for `force_feedback_gain` defined in [`TrossenAIMobileRobot`](../lerobot/common/robot_devices/robots/configs.py). This enables **force feedback** from the follower arm to the leader arm — meaning the user can **feel contact forces** when the robot interacts with external objects (e.g., gripping or bumping into something). A typical starting value is `0.1` for a responsive feel. The default value is `0.0`, which disables force feedback.
 
 ```bash
 python lerobot/scripts/control_robot.py \

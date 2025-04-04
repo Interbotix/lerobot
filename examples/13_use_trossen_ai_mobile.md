@@ -60,7 +60,7 @@ python lerobot/scripts/control_robot.py \
   --robot.max_relative_target=null \
   --control.type=teleoperate
 ```
-By adding `--robot.force_feedback_gain=0.1`, we override the default value for `force_feedback_gain` defined in [`TrossenAIMobileRobot`](lerobot/common/robot_devices/robots/configs.py). This enables **force feedback** from the follower arm to the leader arm — meaning the user can **feel contact forces** when the robot interacts with external objects (e.g., gripping or bumping into something). A typical starting value is `0.1` for a responsive feel. The default value is `0.0`, which disables force feedback. :
+By adding `--robot.force_feedback_gain=0.1`, we override the default value for `force_feedback_gain` defined in [`TrossenAIMobileRobot`](lerobot/common/robot_devices/robots/configs.py). This enables **force feedback** from the follower arm to the leader arm — meaning the user can **feel contact forces** when the robot interacts with external objects (e.g., gripping or bumping into something). A typical starting value is `0.1` for a responsive feel. The default value is `0.0`, which disables force feedback.
 
 ```bash
 python lerobot/scripts/control_robot.py \
@@ -121,7 +121,6 @@ To enable torque-on mode during recording, add the following argument:
 
 For more information about the SLATE remote controller, refer to the official documentation:
 [SLATE RC Controller Guide](https://docs.trossenrobotics.com/slate_docs/operation/rc_controller.html)
-
 
 ## Visualize a dataset
 

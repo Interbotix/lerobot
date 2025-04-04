@@ -160,7 +160,7 @@ class ManipulatorRobot:
     ):
         self.config = config
         self.robot_type = self.config.type
-        if not self.robot_type in ["trossen_ai_stationary", "trossen_ai_solo"]:
+        if self.robot_type not in ["trossen_ai_stationary", "trossen_ai_solo"]:
             self.calibration_dir = Path(self.config.calibration_dir)
         self.leader_arms = make_motors_buses_from_configs(self.config.leader_arms)
         self.follower_arms = make_motors_buses_from_configs(self.config.follower_arms)
@@ -235,7 +235,6 @@ class ManipulatorRobot:
                 self.leader_arms[arms].write("Torque_Enable", 0)
             for arms in self.follower_arms:
                 self.follower_arms[arms].write("Torque_Enable", 1)
-            
 
     def connect(self):
         if self.is_connected:
@@ -255,7 +254,7 @@ class ManipulatorRobot:
         for name in self.leader_arms:
             print(f"Connecting {name} leader arm.")
             self.leader_arms[name].connect()
-        
+
         time.sleep(2)
 
         if self.robot_type in ["koch", "koch_bimanual", "aloha", "trossen_ai_stationary", "trossen_ai_solo"]:
@@ -270,7 +269,7 @@ class ManipulatorRobot:
         for name in self.leader_arms:
             self.leader_arms[name].write("Torque_Enable", TorqueMode.DISABLED.value)
 
-        if not self.robot_type in ["trossen_ai_stationary", "trossen_ai_solo"]:
+        if self.robot_type not in ["trossen_ai_stationary", "trossen_ai_solo"]:
             print("Checking if calibration is needed.")
             self.activate_calibration()
 
@@ -495,7 +494,9 @@ class ManipulatorRobot:
 
             goal_pos = goal_pos.numpy().astype(np.float32)
             self.follower_arms[name].write("Goal_Position", goal_pos)
-            external_efforts = -1 * self.force_feedback_gain * self.follower_arms[name].read("External_Efforts")
+            external_efforts = (
+                -1 * self.force_feedback_gain * self.follower_arms[name].read("External_Efforts")
+            )
             self.leader_arms[name].write("External_Efforts", external_efforts)
             self.logs[f"write_follower_{name}_goal_pos_dt_s"] = time.perf_counter() - before_fwrite_t
 
@@ -637,7 +638,7 @@ class ManipulatorRobot:
 
         for name in self.leader_arms:
             self.leader_arms[name].disconnect()
-        
+
         time.sleep(2)
 
         for name in self.cameras:

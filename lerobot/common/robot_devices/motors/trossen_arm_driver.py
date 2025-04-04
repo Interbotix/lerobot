@@ -18,47 +18,47 @@ TROSSEN_ARM_MODELS = {
 
 class TrossenArmDriver:
     """
-        The `TrossenArmDriver` class provides an interface for controlling
-        Trossen Robotics' robotic arms. It leverages the trossen_arm for communication with arms.
+    The `TrossenArmDriver` class provides an interface for controlling
+    Trossen Robotics' robotic arms. It leverages the trossen_arm for communication with arms.
 
-        This class allows for configuration, torque management, and motion control of robotic arms. It includes features for handling connection states, moving the
-        arm to specified poses, and logging timestamps for debugging and performance analysis.
+    This class allows for configuration, torque management, and motion control of robotic arms. It includes features for handling connection states, moving the
+    arm to specified poses, and logging timestamps for debugging and performance analysis.
 
-        ### Key Features:
-        - **Multi-motor Control:** Supports multiple motors connected to a bus.
-        - **Mode Switching:** Enables switching between position and gravity compensation modes.
-        - **Home and Sleep Pose Management:** Automatically transitions the arm to home and sleep poses for safe operation.
-        - **Error Handling:** Raises specific exceptions for connection and operational errors.
-        - **Logging:** Captures timestamps for operations to aid in debugging.
+    ### Key Features:
+    - **Multi-motor Control:** Supports multiple motors connected to a bus.
+    - **Mode Switching:** Enables switching between position and gravity compensation modes.
+    - **Home and Sleep Pose Management:** Automatically transitions the arm to home and sleep poses for safe operation.
+    - **Error Handling:** Raises specific exceptions for connection and operational errors.
+    - **Logging:** Captures timestamps for operations to aid in debugging.
 
-        ### Example Usage:
-        ```python
-        motors = {
-            "joint_0": (1, "4340"),
-            "joint_1": (2, "4340"),
-            "joint_2": (4, "4340"),
-            "joint_3": (6, "4310"),
-            "joint_4": (7, "4310"),
-            "joint_5": (8, "4310"),
-            "joint_6": (9, "4310"),
-        }
-        arm_driver = TrossenArmDriver(
-            motors=motors,
-            ip="192.168.1.2",
-            model="V0_LEADER",
-        )
-        arm_driver.connect()
+    ### Example Usage:
+    ```python
+    motors = {
+        "joint_0": (1, "4340"),
+        "joint_1": (2, "4340"),
+        "joint_2": (4, "4340"),
+        "joint_3": (6, "4310"),
+        "joint_4": (7, "4310"),
+        "joint_5": (8, "4310"),
+        "joint_6": (9, "4310"),
+    }
+    arm_driver = TrossenArmDriver(
+        motors=motors,
+        ip="192.168.1.2",
+        model="V0_LEADER",
+    )
+    arm_driver.connect()
 
-        # Read motor positions
-        positions = arm_driver.read("Present_Position")
+    # Read motor positions
+    positions = arm_driver.read("Present_Position")
 
-        # Move to a new position (Home Pose)
-        # Last joint is the gripper, which is in range [0, 450]
-        arm_driver.write("Goal_Position", [0, 15, 15, 0, 0, 0, 200])
+    # Move to a new position (Home Pose)
+    # Last joint is the gripper, which is in range [0, 450]
+    arm_driver.write("Goal_Position", [0, 15, 15, 0, 0, 0, 200])
 
-        # Disconnect when done
-        arm_driver.disconnect()
-        ```
+    # Disconnect when done
+    arm_driver.disconnect()
+    ```
     """
 
     def __init__(
@@ -73,19 +73,19 @@ class TrossenArmDriver:
         self.is_connected = False
         self.logs = {}
         self.fps = 30
-        self.home_pose = [0, np.pi/3, np.pi/6, np.pi/5, 0, 0, 0]
+        self.home_pose = [0, np.pi / 3, np.pi / 6, np.pi / 5, 0, 0, 0]
         self.sleep_pose = [0, 0, 0, 0, 0, 0, 0]
 
         self.motors = {
-                    # name: (index, model)
-                    "joint_0": [1, "4340"],
-                    "joint_1": [2, "4340"],
-                    "joint_2": [3, "4340"],
-                    "joint_3": [4, "4310"],
-                    "joint_4": [5, "4310"],
-                    "joint_5": [6, "4310"],
-                    "joint_6": [7, "4310"],
-                }
+            # name: (index, model)
+            "joint_0": [1, "4340"],
+            "joint_1": [2, "4340"],
+            "joint_2": [3, "4340"],
+            "joint_3": [4, "4310"],
+            "joint_4": [5, "4310"],
+            "joint_5": [6, "4310"],
+            "joint_6": [7, "4310"],
+        }
 
         # Minimum time to move for the arm
         self.MIN_TIME_TO_MOVE = 3.0 / self.fps
@@ -105,8 +105,8 @@ class TrossenArmDriver:
         # Get the model configuration
         try:
             model_name, model_end_effector = TROSSEN_ARM_MODELS[self.model]
-        except KeyError:
-            raise ValueError(f"Unsupported model: {self.model}")
+        except KeyError as e:
+            raise ValueError(f"Unsupported model: {self.model}") from e
 
         print("Configuring the drivers...")
 
@@ -115,9 +115,7 @@ class TrossenArmDriver:
             self.driver.configure(model_name, model_end_effector, self.ip, True)
         except Exception:
             traceback.print_exc()
-            print(
-                f"Failed to configure the driver for the {self.model} arm at {self.ip}."
-            )
+            print(f"Failed to configure the driver for the {self.model} arm at {self.ip}.")
             raise
 
         # Move the arms to the home pose
@@ -130,16 +128,14 @@ class TrossenArmDriver:
     def reconnect(self):
         try:
             model_name, model_end_effector = TROSSEN_ARM_MODELS[self.model]
-        except KeyError:
-            raise ValueError(f"Unsupported model: {self.model}")
+        except KeyError as e:
+            raise ValueError(f"Unsupported model: {self.model}") from e
         try:
             self.driver.configure(model_name, model_end_effector, self.ip, True)
-        except Exception:
+        except Exception as e:
             traceback.print_exc()
-            print(
-                f"Failed to configure the driver for the {self.model} arm at {self.ip}."
-            )
-            raise
+            print(f"Failed to configure the driver for the {self.model} arm at {self.ip}.")
+            raise e
 
         self.is_connected = True
 

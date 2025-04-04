@@ -40,6 +40,7 @@ class FeetechMotorsBusConfig(MotorsBusConfig):
     motors: dict[str, tuple[int, str]]
     mock: bool = False
 
+
 @MotorsBusConfig.register_subclass("trossen_arm_driver")
 @dataclass
 class TrossenArmDriverConfig(MotorsBusConfig):

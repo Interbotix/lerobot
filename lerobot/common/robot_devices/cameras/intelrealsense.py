@@ -292,6 +292,10 @@ class IntelRealSenseCamera:
             import pyrealsense2 as rs
 
         config = rs.config()
+        
+        # Create an alignment object
+        # align_to = rs.stream.color
+        # self.align = rs.align(align_to)
         config.enable_device(str(self.serial_number))
 
         if self.fps and self.capture_width and self.capture_height:
@@ -382,40 +386,37 @@ class IntelRealSenseCamera:
         start_time = time.perf_counter()
 
         frame = self.camera.wait_for_frames(timeout_ms=5000)
+        # Update the frame to align the depth frame to the color frame
+        # frame = self.align.process(frame)
+        
+        if not self.use_depth:
+            color_frame = frame.get_color_frame()
 
-        color_frame = frame.get_color_frame()
+            if not color_frame:
+                raise OSError(f"Can't capture color image from IntelRealSenseCamera({self.serial_number}).")
 
-        if not color_frame:
-            raise OSError(f"Can't capture color image from IntelRealSenseCamera({self.serial_number}).")
+            color_image = np.asanyarray(color_frame.get_data())
 
-        color_image = np.asanyarray(color_frame.get_data())
+            requested_color_mode = self.color_mode if temporary_color is None else temporary_color
+            if requested_color_mode not in ["rgb", "bgr"]:
+                raise ValueError(
+                    f"Expected color values are 'rgb' or 'bgr', but {requested_color_mode} is provided."
+                )
 
-        requested_color_mode = self.color_mode if temporary_color is None else temporary_color
-        if requested_color_mode not in ["rgb", "bgr"]:
-            raise ValueError(
-                f"Expected color values are 'rgb' or 'bgr', but {requested_color_mode} is provided."
-            )
+            # IntelRealSense uses RGB format as default (red, green, blue).
+            if requested_color_mode == "bgr":
+                color_image = cv2.cvtColor(color_image, cv2.COLOR_RGB2BGR)
 
-        # IntelRealSense uses RGB format as default (red, green, blue).
-        if requested_color_mode == "bgr":
-            color_image = cv2.cvtColor(color_image, cv2.COLOR_RGB2BGR)
+            h, w, _ = color_image.shape
+            if h != self.capture_height or w != self.capture_width:
+                raise OSError(
+                    f"Can't capture color image with expected height and width ({self.height} x {self.width}). ({h} x {w}) returned instead."
+                )
 
-        h, w, _ = color_image.shape
-        if h != self.capture_height or w != self.capture_width:
-            raise OSError(
-                f"Can't capture color image with expected height and width ({self.height} x {self.width}). ({h} x {w}) returned instead."
-            )
+            if self.rotation is not None:
+                color_image = cv2.rotate(color_image, self.rotation)
 
-        if self.rotation is not None:
-            color_image = cv2.rotate(color_image, self.rotation)
-
-        # log the number of seconds it took to read the image
-        self.logs["delta_timestamp_s"] = time.perf_counter() - start_time
-
-        # log the utc time at which the image was received
-        self.logs["timestamp_utc"] = capture_timestamp_utc()
-
-        if self.use_depth:
+        else:
             depth_frame = frame.get_depth_frame()
             if not depth_frame:
                 raise OSError(f"Can't capture depth image from IntelRealSenseCamera({self.serial_number}).")
@@ -430,17 +431,26 @@ class IntelRealSenseCamera:
 
             if self.rotation is not None:
                 depth_map = cv2.rotate(depth_map, self.rotation)
+            
+            depth_map = np.repeat(depth_map[:, :, np.newaxis], 3, axis=2)
+            
+            depth_normalized = cv2.normalize(depth_map, None, 0, 255, cv2.NORM_MINMAX)
+            depth_map = depth_normalized.astype(np.uint8)
+            # depth_map_colored = cv2.applyColorMap(
+            #     cv2.convertScaleAbs(depth_map, alpha=0.03), cv2.COLORMAP_PLASMA
+            # )
+            
+        # log the number of seconds it took to read the image
+        self.logs["delta_timestamp_s"] = time.perf_counter() - start_time
 
-            return color_image, depth_map
-        else:
-            return color_image
+        # log the utc time at which the image was received
+        self.logs["timestamp_utc"] = capture_timestamp_utc()
+        
+        return depth_map if self.use_depth else color_image
 
     def read_loop(self):
         while not self.stop_event.is_set():
-            if self.use_depth:
-                self.color_image, self.depth_map = self.read()
-            else:
-                self.color_image = self.read()
+            self.color_image = self.read()
 
     def async_read(self):
         """Access the latest color image"""
@@ -465,11 +475,8 @@ class IntelRealSenseCamera:
                     "The thread responsible for `self.async_read()` took too much time to start. There might be an issue. Verify that `self.thread.start()` has been called."
                 )
 
-        if self.use_depth:
-            return self.color_image, self.depth_map
-        else:
-            return self.color_image
-
+        return self.color_image
+    
     def disconnect(self):
         if not self.is_connected:
             raise RobotDeviceNotConnectedError(

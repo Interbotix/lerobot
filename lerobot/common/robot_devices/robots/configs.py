@@ -665,16 +665,17 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
     # Troubleshooting: If one of your IntelRealSense cameras freeze during
     # data recording due to bandwidth limit, you might need to plug the camera
     # on another USB hub or PCIe card.
+    # [218622270304, 130322272628, 128422271347, 218622274938
     cameras: dict[str, CameraConfig] = field(
         default_factory=lambda: {
             "cam_high": IntelRealSenseCameraConfig(
-                serial_number=130322270184,
+                serial_number=218622270304,
                 fps=30,
                 width=640,
                 height=480,
             ),
             "cam_low": IntelRealSenseCameraConfig(
-                serial_number=130322270184,
+                serial_number=130322272628,
                 fps=30,
                 width=640,
                 height=480,

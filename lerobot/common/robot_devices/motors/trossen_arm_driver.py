@@ -178,8 +178,6 @@ class TrossenArmDriver:
         if data_name == "Present_Position":
             # Get the positions of the motors
             values = self.driver.get_positions()
-            values[:-1] = np.degrees(values[:-1])  # Convert all joints except gripper
-            values[-1] = values[-1] * 10000  # Convert gripper to range (0-450)
         elif data_name == "External_Efforts":
             values = self.driver.get_external_efforts()
         else:
@@ -203,10 +201,6 @@ class TrossenArmDriver:
 
         # Write the goal position of the motors
         if data_name == "Goal_Position":
-            values = np.array(values, dtype=np.float32)
-            # Convert back to radians for joints
-            values[:-1] = np.radians(values[:-1])  # Convert all joints except gripper
-            values[-1] = values[-1] / 10000  # Convert gripper back to range (0-0.045)
             self.driver.set_all_positions(values.tolist(), self.MIN_TIME_TO_MOVE, False)
 
         # Enable or disable the torque of the motors

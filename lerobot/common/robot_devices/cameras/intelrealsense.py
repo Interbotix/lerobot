@@ -433,8 +433,8 @@ class IntelRealSenseCamera:
                 depth_map = cv2.rotate(depth_map, self.rotation)
             
             depth_map = np.repeat(depth_map[:, :, np.newaxis], 3, axis=2)
-            # depth_normalized = cv2.normalize(depth_map, None, 0, 255, cv2.NORM_MINMAX)
-            # depth_map = depth_normalized.astype(np.uint8)
+            depth_normalized = cv2.normalize(depth_map, None, 0, 255, cv2.NORM_MINMAX)
+            depth_map = depth_normalized.astype(np.uint8)
             # depth_map = cv2.applyColorMap(
             #     cv2.convertScaleAbs(depth_map, alpha=0.03), cv2.COLORMAP_PLASMA
             # )

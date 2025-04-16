@@ -73,6 +73,7 @@ from lerobot.common.datasets.video_utils import (
     get_video_info,
 )
 from lerobot.common.robot_devices.robots.utils import Robot
+import os
 
 CODEBASE_VERSION = "v2.1"
 
@@ -901,9 +902,11 @@ class LeRobotDataset(torch.utils.data.Dataset):
         assert len(parquet_files) == self.num_episodes
 
         # delete images
-        img_dir = self.root / "images"
-        if img_dir.is_dir():
-            shutil.rmtree(self.root / "images")
+        # Check if the environment variable is set to prevent image deletion
+        if not os.getenv("LEROBOT_KEEP_IMAGES", "false").lower() in ["true", "1", "yes"]:
+            img_dir = self.root / "images"
+            if img_dir.is_dir():
+                shutil.rmtree(img_dir)
 
         if not episode_data:  # Reset the buffer
             self.episode_buffer = self.create_episode_buffer()

@@ -176,6 +176,15 @@ class ManipulatorRobot:
     def camera_features(self) -> dict:
         cam_ft = {}
         for cam_key, cam in self.cameras.items():
+            if cam.use_depth:
+                key = f"observation.images.{cam_key}.depth"
+                cam_ft[key] = {
+                    "dtype": "uint16",
+                    "shape": (cam.height, cam.width),
+                    "names": ["height", "width"],
+                    "info": None,
+                }
+            
             key = f"observation.images.{cam_key}"
             cam_ft[key] = {
                 "shape": (cam.height, cam.width, cam.channels),
@@ -529,10 +538,13 @@ class ManipulatorRobot:
 
         # Capture images from cameras
         images = {}
+        depth_images = {}
         for name in self.cameras:
             before_camread_t = time.perf_counter()
-            images[name] = self.cameras[name].async_read()
+            images[name], depth_images[name] = self.cameras[name].async_read()
             images[name] = torch.from_numpy(images[name])
+            if depth_images[name] is not None:
+                depth_images[name] = torch.from_numpy(depth_images[name])
             self.logs[f"read_camera_{name}_dt_s"] = self.cameras[name].logs["delta_timestamp_s"]
             self.logs[f"async_read_camera_{name}_dt_s"] = time.perf_counter() - before_camread_t
 
@@ -543,6 +555,8 @@ class ManipulatorRobot:
         action_dict["action"] = action
         for name in self.cameras:
             obs_dict[f"observation.images.{name}"] = images[name]
+            if depth_images[name] is not None:
+                obs_dict[f"observation.images.{name}.depth"] = depth_images[name]
 
         return obs_dict, action_dict
 

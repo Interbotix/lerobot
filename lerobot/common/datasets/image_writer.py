@@ -51,8 +51,7 @@ def image_array_to_pil_image(image_array: np.ndarray, range_check: bool = True) 
         raise NotImplementedError(
             f"The image has {image_array.shape[-1]} channels, but 3 is required for now."
         )
-
-    if image_array.dtype != np.uint8:
+    if image_array.dtype not in [np.uint8, np.uint16]:
         if range_check:
             max_ = image_array.max().item()
             min_ = image_array.min().item()
@@ -60,12 +59,14 @@ def image_array_to_pil_image(image_array: np.ndarray, range_check: bool = True) 
                 raise ValueError(
                     "The image data type is float, which requires values in the range [0.0, 1.0]. "
                     f"However, the provided range is [{min_}, {max_}]. Please adjust the range or "
-                    "provide a uint8 image with values in the range [0, 255]."
+                    "provide an image with uint8 values in the range [0, 255] or uint16 values in the range [0, 65535]."
                 )
 
-        image_array = (image_array * 255).astype(np.uint8)
-
-    return PIL.Image.fromarray(image_array)
+        image_array = (image_array * (65535 if image_array.dtype == np.float64 else 255)).astype(np.uint16 if image_array.dtype == np.float64 else np.uint8)
+    if image_array.dtype == np.uint16:
+        return PIL.Image.fromarray(image_array, mode="I;16")
+    elif image_array.dtype == np.uint8:
+        return PIL.Image.fromarray(image_array)
 
 
 def write_image(image: np.ndarray | PIL.Image.Image, fpath: Path):

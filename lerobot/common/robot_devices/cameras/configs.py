@@ -99,7 +99,6 @@ class IntelRealSenseCameraConfig(CameraConfig):
             raise ValueError(
                 f"`color_mode` is expected to be 'rgb' or 'bgr', but {self.color_mode} is provided."
             )
-
         self.channels = 3
 
         at_least_one_is_not_none = self.fps is not None or self.width is not None or self.height is not None

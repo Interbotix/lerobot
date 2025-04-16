@@ -120,7 +120,8 @@ def _assert_type_and_shape(stats_list: list[dict[str, dict]]):
                 if k == "count" and v.shape != (1,):
                     raise ValueError(f"Shape of 'count' must be (1), but is {v.shape} instead.")
                 if "image" in fkey and k != "count" and v.shape != (3, 1, 1):
-                    raise ValueError(f"Shape of '{k}' must be (3,1,1), but is {v.shape} instead.")
+                    if not "depth" in fkey:
+                        raise ValueError(f"Shape of '{k}' must be (3,1,1), but is {v.shape} instead.")
 
 
 def aggregate_feature_stats(stats_ft_list: list[dict[str, dict]]) -> dict[str, dict[str, np.ndarray]]:

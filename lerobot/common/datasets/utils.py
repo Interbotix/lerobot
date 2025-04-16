@@ -391,7 +391,11 @@ def get_features_from_robot(robot: Robot, use_videos: bool = True) -> dict:
     camera_ft = {}
     if robot.cameras:
         camera_ft = {
-            key: {"dtype": "video" if use_videos else "image", **ft}
+            key: (
+                {"dtype": "video" if use_videos else "image", **ft}
+                if not key.endswith(".depth")
+                else ft
+            )
             for key, ft in robot.camera_features.items()
         }
     return {**robot.motor_features, **camera_ft, **DEFAULT_FEATURES}

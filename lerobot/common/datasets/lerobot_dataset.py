@@ -320,7 +320,6 @@ class LeRobotDatasetMetadata:
 
         if robot is not None:
             features = get_features_from_robot(robot, use_videos)
-            print("Robot features:", features)
             robot_type = robot.robot_type
             if not all(cam.fps == fps for cam in robot.cameras.values()):
                 logging.warning(

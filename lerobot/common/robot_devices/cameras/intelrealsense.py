@@ -337,11 +337,25 @@ class IntelRealSenseCamera:
             raise OSError(f"Can't access IntelRealSenseCamera({self.serial_number}).")
 
         color_stream = profile.get_stream(rs.stream.color)
-        color_profile = color_stream.as_video_stream_profile()
-        actual_fps = color_profile.fps()
-        actual_width = color_profile.width()
-        actual_height = color_profile.height()
-
+        self.color_profile = color_stream.as_video_stream_profile()
+        actual_fps = self.color_profile.fps()
+        actual_width = self.color_profile.width()
+        actual_height = self.color_profile.height()
+        
+        depth_stream = profile.get_stream(rs.stream.depth)
+        self.depth_profile = depth_stream.as_video_stream_profile()
+        self.device = profile.get_device()
+        
+        self.device_info = {
+            "name": self.device.get_info(rs.camera_info.name),
+            "serial_number": self.device.get_info(rs.camera_info.serial_number),
+            "firmware_version": self.device.get_info(rs.camera_info.firmware_version),
+            "usb_type": self.device.get_info(rs.camera_info.usb_type_descriptor),
+            "product_id": self.device.get_info(rs.camera_info.product_id),
+            "product_line": self.device.get_info(rs.camera_info.product_line)
+        }
+        
+        
         # Using `math.isclose` since actual fps can be a float (e.g. 29.9 instead of 30)
         if self.fps is not None and not math.isclose(self.fps, actual_fps, rel_tol=1e-3):
             # Using `OSError` since it's a broad that encompasses issues related to device communication
@@ -362,7 +376,70 @@ class IntelRealSenseCamera:
         self.capture_height = round(actual_height)
 
         self.is_connected = True
-
+    
+    def get_depth_instrinsics(self):
+        if not self.is_connected:
+            raise RobotDeviceNotConnectedError(
+                f"IntelRealSenseCamera({self.serial_number}) is not connected. Try running `camera.connect()` first."
+            )
+        depth_intrinsics = self.depth_profile.get_intrinsics()
+        depth_scale = self.device.first_depth_sensor().get_depth_scale()
+            
+        depth_intrinsic_json = {
+            "device_info": self.device_info,
+            "depth_scale": float(depth_scale),  # Add depth scale to the calibration data
+            "depth_camera": {
+                "width": int(depth_intrinsics.width),
+                "height": int(depth_intrinsics.height),
+                "ppx": float(depth_intrinsics.ppx),
+                "ppy": float(depth_intrinsics.ppy),
+                "fx": float(depth_intrinsics.fx),
+                "fy": float(depth_intrinsics.fy),
+                "model": str(depth_intrinsics.model),
+                "coeffs": [float(x) for x in depth_intrinsics.coeffs],
+                "fps": self.depth_profile.fps(),
+                "format": str(self.depth_profile.format()),
+                "index": self.depth_profile.stream_index(),
+                "unique_id": self.depth_profile.unique_id(),
+                "stream_type": str(self.depth_profile.stream_type()),
+                "is_default": self.depth_profile.is_default(),
+            },
+            "extrinsics_depth_to_color_rotation" : [float(x) for x in self.depth_profile.get_extrinsics_to(self.color_profile).rotation],
+            "extrinsics_depth_to_color_translation" : [float(x) for x in self.depth_profile.get_extrinsics_to(self.color_profile).translation]
+        }
+        return depth_intrinsic_json
+    
+    def get_intrinsics(self):
+        if not self.is_connected:
+            raise RobotDeviceNotConnectedError(
+                f"IntelRealSenseCamera({self.serial_number}) is not connected. Try running `camera.connect()` first."
+            )
+            
+        color_intrinsics = self.color_profile.get_intrinsics()
+        
+        depth_scale = self.device.first_depth_sensor().get_depth_scale()
+        color_intrinsics_json = {
+            "device_info": self.device_info,
+            "depth_scale": float(depth_scale),  # Add depth scale to the calibration data
+            "color_camera": {
+                "width": int(color_intrinsics.width),
+                "height": int(color_intrinsics.height),
+                "ppx": float(color_intrinsics.ppx),
+                "ppy": float(color_intrinsics.ppy),
+                "fx": float(color_intrinsics.fx),
+                "fy": float(color_intrinsics.fy),
+                "model": str(color_intrinsics.model),
+                "coeffs": [float(x) for x in color_intrinsics.coeffs],
+                "fps": self.color_profile.fps(),
+                "format": str(self.color_profile.format()),
+                "index": self.color_profile.stream_index(),
+                "unique_id": self.color_profile.unique_id(),
+                "stream_type": str(self.color_profile.stream_type()),
+                "is_default": self.color_profile.is_default(),
+            },
+        }
+        return color_intrinsics_json
+    
     def read(self, temporary_color: str | None = None) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
         """Read a frame from the camera returned in the format height x width x channels (e.g. 480 x 640 x 3)
         of type `np.uint8`, contrarily to the pytorch format which is float channel first.
@@ -493,7 +570,7 @@ class IntelRealSenseCamera:
         self.camera = None
 
         self.is_connected = False
-
+        
     def __del__(self):
         if getattr(self, "is_connected", False):
             self.disconnect()

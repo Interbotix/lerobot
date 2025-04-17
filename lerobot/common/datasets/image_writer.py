@@ -39,6 +39,9 @@ def safe_stop_image_writer(func):
 
 
 def image_array_to_pil_image(image_array: np.ndarray, range_check: bool = True) -> PIL.Image.Image:
+    
+    if image_array.dtype == np.uint16:
+        return PIL.Image.fromarray(image_array, mode="I;16")
     # TODO(aliberts): handle 1 channel and 4 for depth images
     if image_array.ndim != 3:
         raise ValueError(f"The array has {image_array.ndim} dimensions, but 3 is expected for an image.")
@@ -63,10 +66,8 @@ def image_array_to_pil_image(image_array: np.ndarray, range_check: bool = True) 
                 )
 
         image_array = (image_array * (65535 if image_array.dtype == np.float64 else 255)).astype(np.uint16 if image_array.dtype == np.float64 else np.uint8)
-    if image_array.dtype == np.uint16:
-        return PIL.Image.fromarray(image_array, mode="I;16")
-    elif image_array.dtype == np.uint8:
-        return PIL.Image.fromarray(image_array)
+    
+    return PIL.Image.fromarray(image_array)
 
 
 def write_image(image: np.ndarray | PIL.Image.Image, fpath: Path):

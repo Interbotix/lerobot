@@ -179,8 +179,8 @@ class ManipulatorRobot:
             if cam.use_depth:
                 key = f"observation.images.{cam_key}.depth"
                 cam_ft[key] = {
-                    "shape": (cam.height, cam.width, cam.channels),
-                    "names": ["height", "width", "channels"],
+                    "shape": (cam.height, cam.width),
+                    "names": ["height", "width"],
                     "info": None,
                 }
             

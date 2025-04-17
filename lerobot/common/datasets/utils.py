@@ -793,9 +793,14 @@ def validate_feature_image_or_video(name: str, expected_shape: list[str], value:
     error_message = ""
     if isinstance(value, np.ndarray):
         actual_shape = value.shape
-        c, h, w = expected_shape
-        if len(actual_shape) != 3 or (actual_shape != (c, h, w) and actual_shape != (h, w, c)):
-            error_message += f"The feature '{name}' of shape '{actual_shape}' does not have the expected shape '{(c, h, w)}' or '{(h, w, c)}'.\n"
+        if len(expected_shape) == 3:
+            c, h, w = expected_shape
+            if len(actual_shape) != 3 or (actual_shape != (c, h, w) and actual_shape != (h, w, c)):
+                error_message += f"The feature '{name}' of shape '{actual_shape}' does not have the expected shape '{(c, h, w)}' or '{(h, w, c)}'.\n"
+        else:
+            h,w = expected_shape
+            if len(actual_shape) != 2 or actual_shape != (h, w):
+                error_message += f"The feature '{name}' of shape '{actual_shape}' does not have the expected shape '{expected_shape}'.\n"
     elif isinstance(value, PILImage.Image):
         pass
     else:

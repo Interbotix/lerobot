@@ -668,39 +668,34 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
     # 218622270304, 130322272628, 128422271347, 218622274938
     cameras: dict[str, CameraConfig] = field(
         default_factory=lambda: {
-            "cam_high": IntelRealSenseCameraConfig(
-                serial_number=218622270304,
+            "cam_high": OpenCVCameraConfig(
+                camera_index=8,
                 fps=30,
-                width=640,
-                height=480,
-                use_depth=True,
+                width=1280,
+                height=720,
+                rotation=-90,
             ),
-            "cam_low": IntelRealSenseCameraConfig(
-                serial_number=130322272628,
+            "cam_low": OpenCVCameraConfig(
+                camera_index=20,
                 fps=30,
                 width=640,
                 height=480,
-                use_depth=True,
-                
             ),
-            "cam_left_wrist": IntelRealSenseCameraConfig(
-                serial_number=218622274938,
+            "cam_right_wrist": OpenCVCameraConfig(
+                camera_index=26,
                 fps=30,
                 width=640,
                 height=480,
-                use_depth=True,
-                
             ),
-            "cam_right_wrist": IntelRealSenseCameraConfig(
-                serial_number=128422271347,
+            "cam_left_wrist": OpenCVCameraConfig(
+                camera_index=14,
                 fps=30,
                 width=640,
                 height=480,
-                use_depth=True,
-                
             ),
         }
     )
+
 
     mock: bool = False
 

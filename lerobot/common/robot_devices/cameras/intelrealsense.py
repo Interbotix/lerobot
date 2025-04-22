@@ -346,6 +346,25 @@ class IntelRealSenseCamera:
         self.depth_profile = depth_stream.as_video_stream_profile()
         self.device = profile.get_device()
         
+        for sensor in self.device.query_sensors():
+            # Disable auto-exposure and set manual exposure
+            if sensor.supports(rs.option.enable_auto_exposure):
+                sensor.set_option(rs.option.enable_auto_exposure, 0)
+                sensor.set_option(rs.option.exposure, 10000.0)  # microseconds
+
+            # Disable auto white balance and set fixed value
+            if sensor.supports(rs.option.enable_auto_white_balance):
+                sensor.set_option(rs.option.enable_auto_white_balance, 0)
+                sensor.set_option(rs.option.white_balance, 4600.0)  # Kelvin
+
+            # Prioritize frame rate stability
+            if sensor.supports(rs.option.exposure_priority):
+                sensor.set_option(rs.option.exposure_priority, 0.0)
+
+            # Max laser power for better depth quality
+            if self.use_depth and sensor.supports(rs.option.laser_power):
+                sensor.set_option(rs.option.laser_power, 360.0)
+        
         self.device_info = {
             "name": self.device.get_info(rs.camera_info.name),
             "serial_number": self.device.get_info(rs.camera_info.serial_number),

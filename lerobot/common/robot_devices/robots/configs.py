@@ -671,9 +671,8 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
             "cam_high": OpenCVCameraConfig(
                 camera_index=8,
                 fps=30,
-                width=1280,
-                height=720,
-                rotation=-90,
+                width=640,
+                height=480,
             ),
             "cam_low": OpenCVCameraConfig(
                 camera_index=20,
@@ -695,7 +694,6 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
             ),
         }
     )
-
 
     mock: bool = False
 

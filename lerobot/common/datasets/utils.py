@@ -389,34 +389,12 @@ def get_hf_features_from_features(features: dict) -> datasets.Features:
 
 
 def get_features_from_robot(robot: Robot, use_videos: bool = True) -> dict:
-    print("Getting Intrinsics Parameters from Robot Cameras ...")
-    print(f"This might take about {len(robot.cameras) * 2} seconds.")
-    depth_key = f"observation.images.{{camera_name}}.depth"
-    color_key = f"observation.images.{{camera_name}}"
-    intrinsics_ft = {}
-    for name, camera in robot.cameras.items():
-        camera.connect()
-        time.sleep(1)
-        intrinsics = camera.get_intrinsics()
-        if intrinsics is not None:
-            intrinsics_ft[color_key.format(camera_name=name)] = intrinsics
-        if camera.use_depth:
-            depth_intrinsics = camera.get_depth_instrinsics()
-            intrinsics_ft[depth_key.format(camera_name=name)] = depth_intrinsics
-        camera.disconnect()
-        time.sleep(1)
-        
     camera_ft = {}
     if robot.cameras:
         camera_ft = {
-            key: {
-                "dtype": "video" if use_videos else "image",
-                **ft,
-                "intrinsic": intrinsics_ft[key] if key in intrinsics_ft else None,
-            }
+            key: {"dtype": "video" if use_videos else "image", **ft}
             for key, ft in robot.camera_features.items()
         }
-
     return {**robot.motor_features, **camera_ft, **DEFAULT_FEATURES}
 
 

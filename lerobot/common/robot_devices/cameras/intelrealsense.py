@@ -314,9 +314,10 @@ class IntelRealSenseCamera:
             else:
                 config.enable_stream(rs.stream.depth)
 
+        self.frame_queue = rs.frame_queue(10)
         self.camera = rs.pipeline()
         try:
-            profile = self.camera.start(config)
+            profile = self.camera.start(config, self.frame_queue)
             is_camera_open = True
         except RuntimeError:
             is_camera_open = False
@@ -347,23 +348,9 @@ class IntelRealSenseCamera:
         self.device = profile.get_device()
         
         for sensor in self.device.query_sensors():
-            # Disable auto-exposure and set manual exposure
-            if sensor.supports(rs.option.enable_auto_exposure):
-                sensor.set_option(rs.option.enable_auto_exposure, 0)
-                sensor.set_option(rs.option.exposure, 10000.0)  # microseconds
-
-            # Disable auto white balance and set fixed value
-            if sensor.supports(rs.option.enable_auto_white_balance):
-                sensor.set_option(rs.option.enable_auto_white_balance, 0)
-                sensor.set_option(rs.option.white_balance, 4600.0)  # Kelvin
-
             # Prioritize frame rate stability
-            if sensor.supports(rs.option.exposure_priority):
-                sensor.set_option(rs.option.exposure_priority, 0.0)
-
-            # Max laser power for better depth quality
-            if self.use_depth and sensor.supports(rs.option.laser_power):
-                sensor.set_option(rs.option.laser_power, 360.0)
+            if sensor.supports(rs.option.auto_exposure_priority):
+                sensor.set_option(rs.option.auto_exposure_priority, 0.0)
         
         self.device_info = {
             "name": self.device.get_info(rs.camera_info.name),
@@ -481,11 +468,14 @@ class IntelRealSenseCamera:
 
         start_time = time.perf_counter()
 
-        frame = self.camera.wait_for_frames(timeout_ms=5000)
+        if self.frame_queue.poll_for_frame():
+            frame = self.frame_queue.wait_for_frame()
+        # color_frame = frameset.get_color_frame()
+        # frame = self.camera.wait_for_frames(timeout_ms=5000)
         # Update the frame to align the depth frame to the color frame
         # frame = self.align.process(frame)
         
-        color_frame = frame.get_color_frame()
+        color_frame = frame.get_data()
 
         if not color_frame:
             raise OSError(f"Can't capture color image from IntelRealSenseCamera({self.serial_number}).")
@@ -538,7 +528,10 @@ class IntelRealSenseCamera:
 
     def read_loop(self):
         while not self.stop_event.is_set():
+            start = time.time()
             self.color_image, self.depth_map = self.read()
+            elapsed = time.time() - start
+            time.sleep(max(0, 1.0 / self.fps - elapsed))
 
     def async_read(self):
         """Access the latest color image"""

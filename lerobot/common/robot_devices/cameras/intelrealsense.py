@@ -314,10 +314,10 @@ class IntelRealSenseCamera:
             else:
                 config.enable_stream(rs.stream.depth)
 
-        self.frame_queue = rs.frame_queue(10)
+        # self.frame_queue = rs.frame_queue(10)
         self.camera = rs.pipeline()
         try:
-            profile = self.camera.start(config, self.frame_queue)
+            profile = self.camera.start(config)
             is_camera_open = True
         except RuntimeError:
             is_camera_open = False
@@ -340,6 +340,7 @@ class IntelRealSenseCamera:
         color_stream = profile.get_stream(rs.stream.color)
         self.color_profile = color_stream.as_video_stream_profile()
         actual_fps = self.color_profile.fps()
+        print(f"actual_fps: {actual_fps}")
         actual_width = self.color_profile.width()
         actual_height = self.color_profile.height()
         
@@ -347,10 +348,26 @@ class IntelRealSenseCamera:
         self.depth_profile = depth_stream.as_video_stream_profile()
         self.device = profile.get_device()
         
+       
         for sensor in self.device.query_sensors():
             # Prioritize frame rate stability
             if sensor.supports(rs.option.auto_exposure_priority):
                 sensor.set_option(rs.option.auto_exposure_priority, 0.0)
+                sensor.set_option(rs.option.exposure, 10000.0)
+            # Disable backlight compensation if supported
+            # if sensor.supports(rs.option.backlight_compensation):
+            #     sensor.set_option(rs.option.backlight_compensation, 0.0)
+                
+            # Disble power line frequency if supported
+            # if sensor.supports(rs.option.power_line_frequency):
+            #     sensor.set_option(rs.option.power_line_frequency, 0.0)
+                
+            # Disable Laser Power if supported
+            # if sensor.supports(rs.option.laser_power):
+            #     sensor.set_option(rs.option.laser_power, 0.0)
+                
+            # if sensor.supports(rs.option.enable_auto_white_balance):
+            #     sensor.set_option(rs.option.enable_auto_white_balance, 0.0)
         
         self.device_info = {
             "name": self.device.get_info(rs.camera_info.name),
@@ -465,17 +482,13 @@ class IntelRealSenseCamera:
             import tests.cameras.mock_cv2 as cv2
         else:
             import cv2
+            # cv2.setNumThreads(1)
 
         start_time = time.perf_counter()
 
-        if self.frame_queue.poll_for_frame():
-            frame = self.frame_queue.wait_for_frame()
-        # color_frame = frameset.get_color_frame()
-        # frame = self.camera.wait_for_frames(timeout_ms=5000)
-        # Update the frame to align the depth frame to the color frame
-        # frame = self.align.process(frame)
+        frame = self.camera.wait_for_frames(timeout_ms=5000)
         
-        color_frame = frame.get_data()
+        color_frame = frame.get_color_frame()
 
         if not color_frame:
             raise OSError(f"Can't capture color image from IntelRealSenseCamera({self.serial_number}).")
@@ -528,10 +541,10 @@ class IntelRealSenseCamera:
 
     def read_loop(self):
         while not self.stop_event.is_set():
-            start = time.time()
+            # start = time.time()
             self.color_image, self.depth_map = self.read()
-            elapsed = time.time() - start
-            time.sleep(max(0, 1.0 / self.fps - elapsed))
+            # elapsed = time.time() - start
+            # time.sleep(max(0, 1.0 / self.fps - elapsed))
 
     def async_read(self):
         """Access the latest color image"""

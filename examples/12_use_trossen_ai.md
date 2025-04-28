@@ -99,13 +99,13 @@ python lerobot/scripts/control_robot.py \
   --control.type=record \
   --control.fps=30 \
   --control.single_task="Grasp a lego block and put it in the bin." \
-  --control.repo_id=${HF_USER}/trossen_ai_stationary_test \
+  --control.repo_id=CV_THREAD_TX01/trossen_ai_stationary_test \
   --control.tags='["tutorial"]' \
   --control.warmup_time_s=5 \
   --control.episode_time_s=30 \
-  --control.reset_time_s=30 \
-  --control.num_episodes=2 \
-  --control.push_to_hub=true \
+  --control.reset_time_s=3 \
+  --control.num_episodes=1 \
+  --control.push_to_hub=false \
   --control.num_image_writer_threads_per_camera=8
 ```
 
@@ -119,7 +119,7 @@ echo ${HF_USER}/trossen_ai_stationary_test
 If you didn't upload with `--control.push_to_hub=false`, you can also visualize it locally with:
 ```bash
 python lerobot/scripts/visualize_dataset_html.py \
-  --repo-id ${HF_USER}/trossen_ai_stationary_test
+  --repo-id CV_THREAD_TX01/trossen_ai_stationary_test
 ```
 
 ## Replay an episode
@@ -141,10 +141,10 @@ python lerobot/scripts/control_robot.py \
 To train a policy to control your robot, use the [`python lerobot/scripts/train.py`](../lerobot/scripts/train.py) script. A few arguments are required. Here is an example command:
 ```bash
 python lerobot/scripts/train.py \
-  --dataset.repo_id=${HF_USER}/trossen_ai_stationary_test \
+  --dataset.repo_id=TrossenRoboticsCommunity/trossen_ai_stationary_block_transfer \
   --policy.type=act \
-  --output_dir=outputs/train/act_trossen_ai_stationary_test \
-  --job_name=act_trossen_ai_stationary_test \
+  --output_dir=outputs/train/act_trossen_ai_stationary_block_transfer \
+  --job_name=act_trossen_ai_stationary_block_transfer \
   --device=cuda \
   --wandb.enable=true
 ```

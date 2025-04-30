@@ -197,7 +197,9 @@ class TrossenAIMobile:
         }
 
     def teleop_step(
-        self, record_data=False, record_joint_angles=True,
+        self,
+        record_data=False,
+        record_joint_angles=True,
     ) -> None | tuple[dict[str, torch.Tensor], dict[str, torch.Tensor]]:
         if not self.is_connected:
             raise RobotDeviceNotConnectedError(

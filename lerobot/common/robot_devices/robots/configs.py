@@ -14,8 +14,7 @@
 
 import abc
 from dataclasses import dataclass, field
-from typing import Sequence
-from typing import Literal
+from typing import Literal, Sequence
 
 import draccus
 
@@ -635,6 +634,9 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
     # A value of 0.0 disables force feedback. A good starting value for a responsive experience is 0.1.
     force_feedback_gain: float = 0.0
 
+    # Set this according to the camera interface you want to use.
+    # "intel_realsense" is the default and recommended option.
+    # "opencv" is a fallback option that uses OpenCV to access the cameras.
     camera_interface: Literal["intel_realsense", "opencv"] = "intel_realsense"
 
     leader_arms: dict[str, MotorsBusConfig] = field(
@@ -754,6 +756,9 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
     # A value of 0.0 disables force feedback. A good starting value for a responsive experience is 0.1.
     force_feedback_gain: float = 0.0
 
+    # Set this according to the camera interface you want to use.
+    # "intel_realsense" is the default and recommended option.
+    # "opencv" is a fallback option that uses OpenCV to access the cameras.
     camera_interface: Literal["intel_realsense", "opencv"] = "intel_realsense"
 
     leader_arms: dict[str, MotorsBusConfig] = field(
@@ -840,6 +845,9 @@ class TrossenAIMobileRobotConfig(RobotConfig):
     # A value of 0.0 disables force feedback. A good starting value for a responsive experience is 0.1.
     force_feedback_gain: float = 0.0
 
+    # Set this according to the camera interface you want to use.
+    # "intel_realsense" is the default and recommended option.
+    # "opencv" is a fallback option that uses OpenCV to access the cameras.
     camera_interface: Literal["intel_realsense", "opencv"] = "intel_realsense"
 
     enable_motor_torque: bool = False

@@ -15,6 +15,7 @@
 import abc
 from dataclasses import dataclass, field
 from typing import Sequence
+from typing import Literal
 
 import draccus
 
@@ -634,8 +635,7 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
     # A value of 0.0 disables force feedback. A good starting value for a responsive experience is 0.1.
     force_feedback_gain: float = 0.0
 
-    camera_interface: str = 'intel_realsense'
-    # camera_interface: str = 'opencv'
+    camera_interface: Literal["intel_realsense", "opencv"] = "intel_realsense"
 
     leader_arms: dict[str, MotorsBusConfig] = field(
         default_factory=lambda: {
@@ -665,11 +665,7 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
         }
     )
 
-    # Troubleshooting: If one of your IntelRealSense cameras freeze during
-    # data recording due to bandwidth limit, you might need to plug the camera
-    # on another USB hub or PCIe card.
-
-    if camera_interface == 'opencv':
+    if camera_interface == "opencv":
         cameras: dict[str, CameraConfig] = field(
             default_factory=lambda: {
                 "cam_high": OpenCVCameraConfig(
@@ -698,8 +694,10 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
                 ),
             }
         )
-    elif camera_interface == 'intel_realsense':
-        # 218622274938, 130322272628, 128422271347, 218622270304
+    elif camera_interface == "intel_realsense":
+        # Troubleshooting: If one of your IntelRealSense cameras freeze during
+        # data recording due to bandwidth limit, you might need to plug the camera
+        # on another USB hub or PCIe card.
         cameras: dict[str, CameraConfig] = field(
             default_factory=lambda: {
                 "cam_high": IntelRealSenseCameraConfig(
@@ -729,7 +727,9 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
             }
         )
     else:
-        raise ValueError(f"Unknown camera interface: {camera_interface}. Supported values are 'opencv' and 'intel_realsense'.")
+        raise ValueError(
+            f"Unknown camera interface: {camera_interface}. Supported values are 'opencv' and 'intel_realsense'."
+        )
 
     mock: bool = False
 
@@ -753,10 +753,8 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
     # This enables the user to feel external forces (e.g., contact with objects) through force feedback.
     # A value of 0.0 disables force feedback. A good starting value for a responsive experience is 0.1.
     force_feedback_gain: float = 0.0
-  
-    # Set the camera interface to use. Options are 'opencv' or 'intel_realsense'.
-    camera_interface: str = 'intel_realsense'
-    # camera_interface: str = 'opencv'
+
+    camera_interface: Literal["intel_realsense", "opencv"] = "intel_realsense"
 
     leader_arms: dict[str, MotorsBusConfig] = field(
         default_factory=lambda: {
@@ -777,7 +775,7 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
         }
     )
 
-    if camera_interface == 'opencv':
+    if camera_interface == "opencv":
         cameras: dict[str, CameraConfig] = field(
             default_factory=lambda: {
                 "cam_main": OpenCVCameraConfig(
@@ -794,7 +792,7 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
                 ),
             }
         )
-    elif camera_interface == 'intel_realsense':  
+    elif camera_interface == "intel_realsense":
         # Troubleshooting: If one of your IntelRealSense cameras freeze during
         # data recording due to bandwidth limit, you might need to plug the camera
         # on another USB hub or PCIe card.
@@ -815,8 +813,10 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
             }
         )
     else:
-        raise ValueError(f"Unknown camera interface: {camera_interface}. Supported values are 'opencv' and 'intel_realsense'.")
-    
+        raise ValueError(
+            f"Unknown camera interface: {camera_interface}. Supported values are 'opencv' and 'intel_realsense'."
+        )
+
     mock: bool = False
 
 
@@ -839,9 +839,8 @@ class TrossenAIMobileRobotConfig(RobotConfig):
     # This enables the user to feel external forces (e.g., contact with objects) through force feedback.
     # A value of 0.0 disables force feedback. A good starting value for a responsive experience is 0.1.
     force_feedback_gain: float = 0.0
-    
-    camera_interface: str = 'intel_realsense'
-    # camera_interface: str = 'opencv'
+
+    camera_interface: Literal["intel_realsense", "opencv"] = "intel_realsense"
 
     enable_motor_torque: bool = False
 
@@ -873,7 +872,7 @@ class TrossenAIMobileRobotConfig(RobotConfig):
         }
     )
 
-    if camera_interface == 'opencv':
+    if camera_interface == "opencv":
         cameras: dict[str, CameraConfig] = field(
             default_factory=lambda: {
                 "cam_high": OpenCVCameraConfig(
@@ -896,7 +895,7 @@ class TrossenAIMobileRobotConfig(RobotConfig):
                 ),
             }
         )
-    elif camera_interface == 'intel_realsense':
+    elif camera_interface == "intel_realsense":
         # Troubleshooting: If one of your IntelRealSense cameras freeze during
         # data recording due to bandwidth limit, you might need to plug the camera
         # on another USB hub or PCIe card.
@@ -923,6 +922,8 @@ class TrossenAIMobileRobotConfig(RobotConfig):
             }
         )
     else:
-        raise ValueError(f"Unknown camera interface: {camera_interface}. Supported values are 'opencv' and 'intel_realsense'.")
+        raise ValueError(
+            f"Unknown camera interface: {camera_interface}. Supported values are 'opencv' and 'intel_realsense'."
+        )
 
     mock: bool = False

@@ -17,7 +17,7 @@ Usage:
     --tags: Optional tags for the dataset on the Hugging Face Hub.
 
 Example:
-        python convert_test.py --repo_id my_dataset --push_to_hub --private --tags lerobot tutorial
+        python convert_dataset_v21_to_v21_t10.py --repo_id my_dataset --push_to_hub --private --tags "lerobot" "tutorial"
 """
 
 import argparse
@@ -29,7 +29,7 @@ import torch
 from lerobot.common.constants import HF_LEROBOT_HOME
 from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
 
-# This scaling factor was used to prevent the gripper values form vanishing
+# This scaling factor was used to prevent the gripper values from vanishing
 # to zero in the dataset when converted to integer.
 SCALING_FACTOR = 10000
 

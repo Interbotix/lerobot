@@ -106,7 +106,7 @@ class LeRobotDatasetMetadata:
     def load_metadata(self):
         self.info = load_info(self.root)
         check_version_compatibility(self.repo_id, self._version, CODEBASE_VERSION)
-        check_version_compatibility(self.repo_id, self._subversion, TROSSEN_SUBVERSION, subversion=True)
+        check_version_compatibility(self.repo_id, self._subversion, TROSSEN_SUBVERSION, is_subversion=True)
         self.tasks, self.task_to_task_index = load_tasks(self.root)
         self.episodes = load_episodes(self.root)
         if self._version < packaging.version.parse("v2.1"):

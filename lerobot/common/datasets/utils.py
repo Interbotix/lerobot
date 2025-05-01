@@ -287,7 +287,7 @@ def check_version_compatibility(
     version_to_check: str | packaging.version.Version,
     current_version: str | packaging.version.Version,
     enforce_breaking_major: bool = True,
-    subversion: bool = False,
+    is_subversion: bool = False,
 ) -> None:
     v_check = (
         packaging.version.parse(version_to_check)
@@ -300,7 +300,7 @@ def check_version_compatibility(
         else current_version
     )
     if v_check.major < v_current.major and enforce_breaking_major:
-        if subversion:
+        if is_subversion:
             raise SubVersionBackwardCompatibilityError(repo_id, v_check)
         raise BackwardCompatibilityError(repo_id, v_check)
     elif v_check.minor < v_current.minor:

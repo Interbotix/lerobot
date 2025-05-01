@@ -53,11 +53,19 @@ As we cannot ensure forward compatibility with it, please update your current ve
 """
 
 TROSSEN_V1_MESSAGE = """
-The dataset you requested ({repo_id}) is in {version} format.
 
-We have introduced a new format (Trossen Subversion 1.0) for datasets involving Trossen robotic arms.
-The Trossen v1.0 subversion uses radians for joint angles and removes the scaling for gripper values.
-Please, use our conversion script.
+The dataset you requested ({repo_id}) is in subversion {version} or lacks a defined subversion.
+
+This subversion is incompatible with the current version of Interbotix/LeRobot.
+
+Using incompatible subversions is discouraged, as joint actions may have larger-than-expected values in this code version.
+
+We have introduced a new dataset format (Trossen Subversion 1.0) specifically for datasets involving Trossen robotic arms.
+Key improvements in Trossen v1.0 include:
+- Joint angles are now expressed in radians.
+- Gripper values are represented in millimeters, with scaling removed.
+
+To update your dataset to the new format, use the following conversion script:
 
 ```
 python lerobot/scripts/convert_dataset_v21_to_v21_t10.py --repo-id {repo_id}

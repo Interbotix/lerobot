@@ -39,6 +39,7 @@ from lerobot.common.datasets.backward_compatibility import (
     V21_MESSAGE,
     BackwardCompatibilityError,
     ForwardCompatibilityError,
+    SubVersionBackwardCompatibilityError,
 )
 from lerobot.common.robot_devices.robots.utils import Robot
 from lerobot.common.utils.utils import is_valid_numpy_dtype_string
@@ -286,6 +287,7 @@ def check_version_compatibility(
     version_to_check: str | packaging.version.Version,
     current_version: str | packaging.version.Version,
     enforce_breaking_major: bool = True,
+    subversion: bool = False,
 ) -> None:
     v_check = (
         packaging.version.parse(version_to_check)
@@ -298,6 +300,8 @@ def check_version_compatibility(
         else current_version
     )
     if v_check.major < v_current.major and enforce_breaking_major:
+        if subversion:
+            raise SubVersionBackwardCompatibilityError(repo_id, v_check)
         raise BackwardCompatibilityError(repo_id, v_check)
     elif v_check.minor < v_current.minor:
         logging.warning(V21_MESSAGE.format(repo_id=repo_id, version=v_check))

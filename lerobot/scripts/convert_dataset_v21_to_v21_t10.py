@@ -29,6 +29,10 @@ import torch
 from lerobot.common.constants import HF_LEROBOT_HOME
 from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
 
+# This scaling factor was used to prevent the gripper values form vanishing
+# to zero in the dataset when converted to integer.
+SCALING_FACTOR = 10000
+
 
 class DatasetModifier:
     def __init__(self, repo_id, root, push_to_hub, private=False, tags=None):
@@ -76,8 +80,8 @@ class DatasetModifier:
         left_arm[:-1] = np.deg2rad(left_arm[:-1])
 
         # Revert the scaling of the gripper of each arm
-        right_arm[-1] /= 10000
-        left_arm[-1] /= 10000
+        right_arm[-1] /= SCALING_FACTOR
+        left_arm[-1] /= SCALING_FACTOR
 
         return np.concatenate([right_arm, left_arm])
 

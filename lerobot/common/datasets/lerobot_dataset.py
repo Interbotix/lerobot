@@ -31,6 +31,7 @@ from huggingface_hub.constants import REPOCARD_NAME
 from huggingface_hub.errors import RevisionNotFoundError
 
 from lerobot.common.constants import HF_LEROBOT_HOME
+from lerobot.common.datasets.backward_compatibility import SubVersionBackwardCompatibilityError
 from lerobot.common.datasets.compute_stats import aggregate_stats, compute_episode_stats
 from lerobot.common.datasets.image_writer import AsyncImageWriter, write_image
 from lerobot.common.datasets.utils import (
@@ -75,6 +76,7 @@ from lerobot.common.datasets.video_utils import (
 from lerobot.common.robot_devices.robots.utils import Robot
 
 CODEBASE_VERSION = "v2.1"
+TROSSEN_SUBVERSION = "v1.0"
 
 
 class LeRobotDatasetMetadata:
@@ -104,6 +106,7 @@ class LeRobotDatasetMetadata:
     def load_metadata(self):
         self.info = load_info(self.root)
         check_version_compatibility(self.repo_id, self._version, CODEBASE_VERSION)
+        check_version_compatibility(self.repo_id, self._subversion, TROSSEN_SUBVERSION, is_subversion=True)
         self.tasks, self.task_to_task_index = load_tasks(self.root)
         self.episodes = load_episodes(self.root)
         if self._version < packaging.version.parse("v2.1"):
@@ -131,6 +134,14 @@ class LeRobotDatasetMetadata:
     def _version(self) -> packaging.version.Version:
         """Codebase version used to create this dataset."""
         return packaging.version.parse(self.info["codebase_version"])
+
+    @property
+    def _subversion(self) -> packaging.version.Version:
+        """Trossen subversion used to create this dataset."""
+        if "trossen_subversion" not in self.info:
+            raise SubVersionBackwardCompatibilityError(self.repo_id, "v0.0")
+        sub_version = self.info["trossen_subversion"]
+        return packaging.version.parse(sub_version)
 
     def get_data_file_path(self, ep_index: int) -> Path:
         ep_chunk = self.get_episode_chunk(ep_index)
@@ -343,7 +354,9 @@ class LeRobotDatasetMetadata:
 
         obj.tasks, obj.task_to_task_index = {}, {}
         obj.episodes_stats, obj.stats, obj.episodes = {}, {}, {}
-        obj.info = create_empty_dataset_info(CODEBASE_VERSION, fps, robot_type, features, use_videos)
+        obj.info = create_empty_dataset_info(
+            CODEBASE_VERSION, TROSSEN_SUBVERSION, fps, robot_type, features, use_videos
+        )
         if len(obj.video_keys) > 0 and not use_videos:
             raise ValueError()
         write_json(obj.info, obj.root / INFO_PATH)

@@ -52,6 +52,29 @@ The dataset you requested ({repo_id}) is only available in {version} format.
 As we cannot ensure forward compatibility with it, please update your current version of lerobot.
 """
 
+TROSSEN_V1_MESSAGE = """
+
+The dataset you requested ({repo_id}) is in subversion {version} or lacks a defined subversion.
+
+This subversion is incompatible with the current version of Interbotix/LeRobot.
+
+Using incompatible subversions is discouraged, as joint actions may have larger-than-expected values in this code version.
+
+We have introduced a new dataset format (Trossen Subversion 1.0) specifically for datasets involving Trossen robotic arms.
+Key improvements in Trossen v1.0 include:
+- Joint angles are now expressed in radians.
+- Gripper values are represented in millimeters, with scaling removed.
+
+To update your dataset to the new format, use the following conversion script:
+
+```
+python lerobot/scripts/convert_dataset_v21_to_v21_t10.py --repo-id {repo_id}
+```
+
+If you encounter a problem, contact Interbotix maintainers
+or open an [issue on GitHub](https://github.com/Interbotix/lerobot/issues/new/choose).
+"""
+
 
 class CompatibilityError(Exception): ...
 
@@ -65,4 +88,10 @@ class BackwardCompatibilityError(CompatibilityError):
 class ForwardCompatibilityError(CompatibilityError):
     def __init__(self, repo_id: str, version: packaging.version.Version):
         message = FUTURE_MESSAGE.format(repo_id=repo_id, version=version)
+        super().__init__(message)
+
+
+class SubVersionBackwardCompatibilityError(CompatibilityError):
+    def __init__(self, repo_id: str, version: packaging.version.Version):
+        message = TROSSEN_V1_MESSAGE.format(repo_id=repo_id, version=version)
         super().__init__(message)

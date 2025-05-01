@@ -98,13 +98,13 @@ python lerobot/scripts/control_robot.py \
   --robot.max_relative_target=null \
   --control.type=record \
   --control.fps=30 \
-  --control.single_task="Grasp a lego block and put it in the bin." \
-  --control.repo_id=CV_THREAD_TX01/trossen_ai_stationary_test \
+  --control.single_task=" Test the video recording capabilities of intelrealsense cameras in various hardware setups." \
+  --control.repo_id=INTEL_REALSENSE/trossen_ai_stationary_three_rgb_camera \
   --control.tags='["tutorial"]' \
   --control.warmup_time_s=5 \
   --control.episode_time_s=30 \
   --control.reset_time_s=3 \
-  --control.num_episodes=1 \
+  --control.num_episodes=2 \
   --control.push_to_hub=false \
   --control.num_image_writer_threads_per_camera=8
 ```
@@ -119,7 +119,7 @@ echo ${HF_USER}/trossen_ai_stationary_test
 If you didn't upload with `--control.push_to_hub=false`, you can also visualize it locally with:
 ```bash
 python lerobot/scripts/visualize_dataset_html.py \
-  --repo-id CV_THREAD_TX01/trossen_ai_stationary_test
+  --repo-id INTEL_REALSENSE/trossen_ai_stationary_three_rgb_camera 
 ```
 
 ## Replay an episode

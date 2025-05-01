@@ -344,16 +344,17 @@ class IntelRealSenseCamera:
         actual_width = self.color_profile.width()
         actual_height = self.color_profile.height()
         
-        depth_stream = profile.get_stream(rs.stream.depth)
-        self.depth_profile = depth_stream.as_video_stream_profile()
+        if self.use_depth:
+            depth_stream = profile.get_stream(rs.stream.depth)
+            self.depth_profile = depth_stream.as_video_stream_profile()
         self.device = profile.get_device()
         
        
-        for sensor in self.device.query_sensors():
-            # Prioritize frame rate stability
-            if sensor.supports(rs.option.auto_exposure_priority):
-                sensor.set_option(rs.option.auto_exposure_priority, 0.0)
-                sensor.set_option(rs.option.exposure, 10000.0)
+        # for sensor in self.device.query_sensors():
+        #     # Prioritize frame rate stability
+        #     if sensor.supports(rs.option.auto_exposure_priority):
+        #         sensor.set_option(rs.option.auto_exposure_priority, 0.0)
+        #         sensor.set_option(rs.option.exposure, 10000.0)
             # Disable backlight compensation if supported
             # if sensor.supports(rs.option.backlight_compensation):
             #     sensor.set_option(rs.option.backlight_compensation, 0.0)
@@ -514,6 +515,8 @@ class IntelRealSenseCamera:
         if self.rotation is not None:
             color_image = cv2.rotate(color_image, self.rotation)
 
+        depth_map = None
+        
         if self.use_depth:
             
             depth_frame = frame.get_depth_frame()

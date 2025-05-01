@@ -31,13 +31,14 @@ from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
 
 
 class DatasetModifier:
-    def __init__(self, repo_id, push_to_hub, private=False, tags=None):
+    def __init__(self, repo_id, root, push_to_hub, private=False, tags=None):
         self.repo_id = repo_id
         self.push_to_hub = push_to_hub
         self.private = private
         self.tags = tags
-        self.local_root = HF_LEROBOT_HOME / repo_id if not push_to_hub else None
-        self.meta_folder = self.local_root / "meta" if self.local_root else None
+        self.root = HF_LEROBOT_HOME if root is None else root
+        self.dataset_dir = self.root / repo_id
+        self.meta_folder = self.dataset_dir / "meta" if self.dataset_dir else None
         self.info_file = self.meta_folder / "info.json" if self.meta_folder else None
         self.episodes_stats_path = self.meta_folder / "episodes_stats.jsonl" if self.meta_folder else None
         self.total_episodes = 0
@@ -45,7 +46,7 @@ class DatasetModifier:
 
     def load_metadata(self):
         if not self.info_file or not self.info_file.exists():
-            raise FileNotFoundError(f"info.json not found in {self.meta_folder}")
+            raise FileNotFoundError(f"{self.info_file} not found.")
 
         with open(self.info_file) as f:
             info_data = json.load(f)
@@ -118,10 +119,10 @@ class DatasetModifier:
 
     def modify_dataset(self):
         for episode_index in range(self.total_episodes):
-            dataset = (
-                LeRobotDataset(repo_id=self.repo_id, root=self.local_root, episodes=[episode_index])
-                if not self.push_to_hub
-                else LeRobotDataset(repo_id=self.repo_id, root=None, force_cache_sync=False)
+            dataset = LeRobotDataset(
+                repo_id=self.repo_id,
+                root=self.root if self.root != HF_LEROBOT_HOME else None,
+                episodes=[episode_index],
             )
 
             modified_actions = []
@@ -177,6 +178,7 @@ class DatasetModifier:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Modify dataset and update stats.")
     parser.add_argument("--repo_id", type=str, required=True, help="Repository ID of the dataset.")
+    parser.add_argument("--root", type=str, default=None, help="Root directory for the dataset.")
     parser.add_argument("--push_to_hub", action="store_true", help="Flag to load dataset from hub.")
     parser.add_argument(
         "--private", action="store_true", help="Upload on private repository on the Hugging Face hub."
@@ -185,7 +187,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     modifier = DatasetModifier(
-        repo_id=args.repo_id, push_to_hub=args.push_to_hub, private=args.private, tags=args.tags
+        repo_id=args.repo_id,
+        root=args.root,
+        push_to_hub=args.push_to_hub,
+        private=args.private,
+        tags=args.tags,
     )
     modifier.load_metadata()
     modifier.modify_dataset()

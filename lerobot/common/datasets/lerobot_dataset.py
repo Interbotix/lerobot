@@ -75,6 +75,7 @@ from lerobot.common.datasets.video_utils import (
 from lerobot.common.robot_devices.robots.utils import Robot
 
 CODEBASE_VERSION = "v2.1"
+TROSSEN_SUBVERSION = "v1.0"
 
 
 class LeRobotDatasetMetadata:
@@ -343,7 +344,9 @@ class LeRobotDatasetMetadata:
 
         obj.tasks, obj.task_to_task_index = {}, {}
         obj.episodes_stats, obj.stats, obj.episodes = {}, {}, {}
-        obj.info = create_empty_dataset_info(CODEBASE_VERSION, fps, robot_type, features, use_videos)
+        obj.info = create_empty_dataset_info(
+            CODEBASE_VERSION, TROSSEN_SUBVERSION, fps, robot_type, features, use_videos
+        )
         if len(obj.video_keys) > 0 and not use_videos:
             raise ValueError()
         write_json(obj.info, obj.root / INFO_PATH)

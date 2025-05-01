@@ -430,6 +430,7 @@ def dataset_to_policy_features(features: dict[str, dict]) -> dict[str, PolicyFea
 
 def create_empty_dataset_info(
     codebase_version: str,
+    trossen_subversion: str,
     fps: int,
     robot_type: str,
     features: dict,
@@ -437,6 +438,7 @@ def create_empty_dataset_info(
 ) -> dict:
     return {
         "codebase_version": codebase_version,
+        "trossen_subversion": trossen_subversion,
         "robot_type": robot_type,
         "total_episodes": 0,
         "total_frames": 0,

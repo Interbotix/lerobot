@@ -86,10 +86,12 @@ class LeRobotDatasetMetadata:
         root: str | Path | None = None,
         revision: str | None = None,
         force_cache_sync: bool = False,
+        edit_mode: bool = False,
     ):
         self.repo_id = repo_id
         self.revision = revision if revision else CODEBASE_VERSION
         self.root = Path(root) if root is not None else HF_LEROBOT_HOME / repo_id
+        self.edit_mode = edit_mode
 
         try:
             if force_cache_sync:
@@ -105,8 +107,11 @@ class LeRobotDatasetMetadata:
 
     def load_metadata(self):
         self.info = load_info(self.root)
-        check_version_compatibility(self.repo_id, self._version, CODEBASE_VERSION)
-        check_version_compatibility(self.repo_id, self._subversion, TROSSEN_SUBVERSION, is_subversion=True)
+        if not self.edit_mode:
+            check_version_compatibility(self.repo_id, self._version, CODEBASE_VERSION)
+            check_version_compatibility(
+                self.repo_id, self._subversion, TROSSEN_SUBVERSION, is_subversion=True
+            )
         self.tasks, self.task_to_task_index = load_tasks(self.root)
         self.episodes = load_episodes(self.root)
         if self._version < packaging.version.parse("v2.1"):
@@ -377,6 +382,7 @@ class LeRobotDataset(torch.utils.data.Dataset):
         force_cache_sync: bool = False,
         download_videos: bool = True,
         video_backend: str | None = None,
+        edit_mode: bool = False,
     ):
         """
         2 modes are available for instantiating this class, depending on 2 different use cases:
@@ -489,6 +495,7 @@ class LeRobotDataset(torch.utils.data.Dataset):
         self.revision = revision if revision else CODEBASE_VERSION
         self.video_backend = video_backend if video_backend else get_safe_default_codec()
         self.delta_indices = None
+        self.edit_mode = edit_mode
 
         # Unused attributes
         self.image_writer = None
@@ -498,7 +505,11 @@ class LeRobotDataset(torch.utils.data.Dataset):
 
         # Load metadata
         self.meta = LeRobotDatasetMetadata(
-            self.repo_id, self.root, self.revision, force_cache_sync=force_cache_sync
+            self.repo_id,
+            self.root,
+            self.revision,
+            force_cache_sync=force_cache_sync,
+            edit_mode=self.edit_mode,
         )
         if self.episodes is not None and self.meta._version >= packaging.version.parse("v2.1"):
             episodes_stats = [self.meta.episodes_stats[ep_idx] for ep_idx in self.episodes]

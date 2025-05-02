@@ -127,6 +127,7 @@ class DatasetModifier:
                 repo_id=self.repo_id,
                 root=self.root if self.root != HF_LEROBOT_HOME else None,
                 episodes=[episode_index],
+                edit_mode=True,
             )
 
             modified_actions = []

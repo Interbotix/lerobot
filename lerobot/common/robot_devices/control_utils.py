@@ -282,6 +282,9 @@ def control_loop(
             events["exit_early"] = False
             break
 
+        if policy is not None:
+            policy.reset()
+
 
 def reset_environment(robot, events, reset_time_s, fps):
     # TODO(rcadene): refactor warmup_record and reset_environment

@@ -177,9 +177,9 @@ class TrossenArmDriver:
         # Read the present position of the motors
         if data_name == "Present_Position":
             # Get the positions of the motors
-            values = self.driver.get_positions()
+            values = self.driver.get_all_positions()
         elif data_name == "External_Efforts":
-            values = self.driver.get_external_efforts()
+            values = self.driver.get_all_external_efforts()
         else:
             values = None
             print(f"Data name: {data_name} is not supported for reading.")

@@ -218,7 +218,7 @@ class TrossenArmDriver:
             self.driver.set_all_modes(trossen.Mode.position)
             self.driver.set_all_positions(self.home_pose, 2.0, False)
         elif data_name == "External_Efforts":
-            self.driver.set_all_external_efforts(values, 0.0, False)
+            self.driver.set_all_external_efforts(values.tolist(), 0.0, False)
         else:
             print(f"Data name: {data_name} value: {values} is not supported for writing.")
 

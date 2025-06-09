@@ -109,11 +109,11 @@ def predict_action(observation, policy, device, use_amp):
     ):
         # Convert to pytorch format: channel first and float32 in [0,1] with batch dimension
         for name in observation:
+            observation[name] = observation[name].to(device)
             if "image" in name:
                 observation[name] = observation[name].type(torch.float32) / 255
                 observation[name] = observation[name].permute(2, 0, 1).contiguous()
             observation[name] = observation[name].unsqueeze(0)
-            observation[name] = observation[name].to(device)
 
         # Compute the next action with the policy
         # based on the current observation

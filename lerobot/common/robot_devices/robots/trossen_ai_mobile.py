@@ -115,7 +115,7 @@ class TrossenAIMobile:
         success, result = self.base.init_base()
         if not success:
             raise RobotDeviceNotConnectedError(
-                f"{result}.\nMake sure the robot is powered on and connected to the computer.\n{self.check_base_state()[0]}"
+                f"{result}.\nMake sure the robot is powered on and connected to the computer."
             )
         try:
             if self.check_base_state()[1] == SlateBaseSystemState.SYS_ESTOP:

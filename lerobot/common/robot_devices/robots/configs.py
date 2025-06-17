@@ -14,7 +14,7 @@
 
 import abc
 from dataclasses import dataclass, field
-from typing import Literal, Sequence
+from typing import Sequence
 
 import draccus
 
@@ -637,7 +637,7 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
     # Set this according to the camera interface you want to use.
     # "intel_realsense" is the default and recommended option.
     # "opencv" is a fallback option that uses OpenCV to access the cameras.
-    camera_interface: Literal["intel_realsense", "opencv"] = "intel_realsense"
+    camera_interface: str = "intel_realsense"
 
     leader_arms: dict[str, MotorsBusConfig] = field(
         default_factory=lambda: {
@@ -666,42 +666,45 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
             ),
         }
     )
+    cameras: dict[str, CameraConfig] = field(init=False)  # Initialized later
 
-    if camera_interface == "opencv":
-        cameras: dict[str, CameraConfig] = field(
-            default_factory=lambda: {
+    mock: bool = False
+
+    def __post_init__(self):
+        # Initialize cameras based on the selected camera interface
+        if self.camera_interface == "opencv":
+            self.cameras = {
                 "cam_high": OpenCVCameraConfig(
-                    camera_index=26,
-                    fps=30,
-                    width=640,
-                    height=480,
-                ),
-                "cam_low": OpenCVCameraConfig(
-                    camera_index=14,
-                    fps=30,
-                    width=640,
-                    height=480,
-                ),
-                "cam_left_wrist": OpenCVCameraConfig(
-                    camera_index=8,
-                    fps=30,
-                    width=640,
-                    height=480,
-                ),
-                "cam_right_wrist": OpenCVCameraConfig(
                     camera_index=20,
                     fps=30,
                     width=640,
                     height=480,
                 ),
+                "cam_low": OpenCVCameraConfig(
+                    camera_index=38,
+                    fps=30,
+                    width=640,
+                    height=480,
+                ),
+                "cam_left_wrist": OpenCVCameraConfig(
+                    camera_index=14,
+                    fps=30,
+                    width=640,
+                    height=480,
+                ),
+                "cam_right_wrist": OpenCVCameraConfig(
+                    camera_index=26,
+                    fps=30,
+                    width=640,
+                    height=480,
+                ),
             }
-        )
-    elif camera_interface == "intel_realsense":
-        # Troubleshooting: If one of your IntelRealSense cameras freeze during
-        # data recording due to bandwidth limit, you might need to plug the camera
-        # on another USB hub or PCIe card.
-        cameras: dict[str, CameraConfig] = field(
-            default_factory=lambda: {
+
+        elif self.camera_interface == "intel_realsense":
+            # Troubleshooting: If one of your IntelRealSense cameras freeze during
+            # data recording due to bandwidth limit, you might need to plug the camera
+            # on another USB hub or PCIe card.
+            self.cameras: dict[str, CameraConfig] = {
                 "cam_high": IntelRealSenseCameraConfig(
                     serial_number=218622274938,
                     fps=30,
@@ -727,13 +730,11 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
                     height=480,
                 ),
             }
-        )
-    else:
-        raise ValueError(
-            f"Unknown camera interface: {camera_interface}. Supported values are 'opencv' and 'intel_realsense'."
-        )
 
-    mock: bool = False
+        else:
+            raise ValueError(
+                f"Unknown camera interface: {self.camera_interface}. Supported values are 'opencv' and 'intel_realsense'."
+            )
 
 
 @RobotConfig.register_subclass("trossen_ai_solo")
@@ -759,7 +760,7 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
     # Set this according to the camera interface you want to use.
     # "intel_realsense" is the default and recommended option.
     # "opencv" is a fallback option that uses OpenCV to access the cameras.
-    camera_interface: Literal["intel_realsense", "opencv"] = "intel_realsense"
+    camera_interface: str = "intel_realsense"
 
     leader_arms: dict[str, MotorsBusConfig] = field(
         default_factory=lambda: {
@@ -780,9 +781,13 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
         }
     )
 
-    if camera_interface == "opencv":
-        cameras: dict[str, CameraConfig] = field(
-            default_factory=lambda: {
+    cameras: dict[str, CameraConfig] = field(init=False)  # Initialized later
+
+    mock: bool = False
+
+    def __post_init__(self):
+        if self.camera_interface == "opencv":
+            self.cameras: dict[str, CameraConfig] = {
                 "cam_main": OpenCVCameraConfig(
                     camera_index=26,
                     fps=30,
@@ -796,13 +801,12 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
                     height=480,
                 ),
             }
-        )
-    elif camera_interface == "intel_realsense":
-        # Troubleshooting: If one of your IntelRealSense cameras freeze during
-        # data recording due to bandwidth limit, you might need to plug the camera
-        # on another USB hub or PCIe card.
-        cameras: dict[str, CameraConfig] = field(
-            default_factory=lambda: {
+
+        elif self.camera_interface == "intel_realsense":
+            # Troubleshooting: If one of your IntelRealSense cameras freeze during
+            # data recording due to bandwidth limit, you might need to plug the camera
+            # on another USB hub or PCIe card.
+            self.cameras: dict[str, CameraConfig] = {
                 "cam_main": IntelRealSenseCameraConfig(
                     serial_number=130322270184,
                     fps=30,
@@ -816,13 +820,10 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
                     height=480,
                 ),
             }
-        )
-    else:
-        raise ValueError(
-            f"Unknown camera interface: {camera_interface}. Supported values are 'opencv' and 'intel_realsense'."
-        )
-
-    mock: bool = False
+        else:
+            raise ValueError(
+                f"Unknown camera interface: {self.camera_interface}. Supported values are 'opencv' and 'intel_realsense'."
+            )
 
 
 @RobotConfig.register_subclass("trossen_ai_mobile")
@@ -848,7 +849,7 @@ class TrossenAIMobileRobotConfig(RobotConfig):
     # Set this according to the camera interface you want to use.
     # "intel_realsense" is the default and recommended option.
     # "opencv" is a fallback option that uses OpenCV to access the cameras.
-    camera_interface: Literal["intel_realsense", "opencv"] = "intel_realsense"
+    camera_interface: str = "intel_realsense"
 
     enable_motor_torque: bool = False
 
@@ -880,58 +881,61 @@ class TrossenAIMobileRobotConfig(RobotConfig):
         }
     )
 
-    if camera_interface == "opencv":
-        cameras: dict[str, CameraConfig] = field(
-            default_factory=lambda: {
-                "cam_high": OpenCVCameraConfig(
-                    camera_index=26,
-                    fps=30,
-                    width=640,
-                    height=480,
-                ),
-                "cam_left_wrist": OpenCVCameraConfig(
-                    camera_index=8,
-                    fps=30,
-                    width=640,
-                    height=480,
-                ),
-                "cam_right_wrist": OpenCVCameraConfig(
-                    camera_index=20,
-                    fps=30,
-                    width=640,
-                    height=480,
-                ),
-            }
-        )
-    elif camera_interface == "intel_realsense":
-        # Troubleshooting: If one of your IntelRealSense cameras freeze during
-        # data recording due to bandwidth limit, you might need to plug the camera
-        # on another USB hub or PCIe card.
-        cameras: dict[str, CameraConfig] = field(
-            default_factory=lambda: {
-                "cam_high": IntelRealSenseCameraConfig(
-                    serial_number=130322270184,
-                    fps=30,
-                    width=640,
-                    height=480,
-                ),
-                "cam_left_wrist": IntelRealSenseCameraConfig(
-                    serial_number=218622274938,
-                    fps=30,
-                    width=640,
-                    height=480,
-                ),
-                "cam_right_wrist": IntelRealSenseCameraConfig(
-                    serial_number=128422271347,
-                    fps=30,
-                    width=640,
-                    height=480,
-                ),
-            }
-        )
-    else:
-        raise ValueError(
-            f"Unknown camera interface: {camera_interface}. Supported values are 'opencv' and 'intel_realsense'."
-        )
+    cameras: dict[str, CameraConfig] = field(init=False)  # Initialized later
 
     mock: bool = False
+
+    def __post_init__(self):
+        if self.camera_interface == "opencv":
+            self.cameras: dict[str, CameraConfig] = field(
+                default_factory=lambda: {
+                    "cam_high": OpenCVCameraConfig(
+                        camera_index=26,
+                        fps=30,
+                        width=640,
+                        height=480,
+                    ),
+                    "cam_left_wrist": OpenCVCameraConfig(
+                        camera_index=8,
+                        fps=30,
+                        width=640,
+                        height=480,
+                    ),
+                    "cam_right_wrist": OpenCVCameraConfig(
+                        camera_index=20,
+                        fps=30,
+                        width=640,
+                        height=480,
+                    ),
+                }
+            )
+        elif self.camera_interface == "intel_realsense":
+            # Troubleshooting: If one of your IntelRealSense cameras freeze during
+            # data recording due to bandwidth limit, you might need to plug the camera
+            # on another USB hub or PCIe card.128422271327, 218622274938, 130322272628, 218622270304, 128422271347
+            self.cameras: dict[str, CameraConfig] = field(
+                default_factory=lambda: {
+                    "cam_high": IntelRealSenseCameraConfig(
+                        serial_number=128422271327,
+                        fps=30,
+                        width=640,
+                        height=480,
+                    ),
+                    "cam_left_wrist": IntelRealSenseCameraConfig(
+                        serial_number=218622274938,
+                        fps=30,
+                        width=640,
+                        height=480,
+                    ),
+                    "cam_right_wrist": IntelRealSenseCameraConfig(
+                        serial_number=130322272628,
+                        fps=30,
+                        width=640,
+                        height=480,
+                    ),
+                }
+            )
+        else:
+            raise ValueError(
+                f"Unknown camera interface: {self.camera_interface}. Supported values are 'opencv' and 'intel_realsense'."
+            )

@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..config import TeleoperatorConfig
 
@@ -25,12 +25,15 @@ class WidowXAILeaderConfig(TeleoperatorConfig):
     # IP address of the arm
     ip_address: str
 
-    joint_names: list[str] = [
-        "joint_0",
-        "joint_1",
-        "joint_2",
-        "joint_3",
-        "joint_4",
-        "joint_5",
-        "left_carriage_joint",
-    ]
+    # Joint names for the WidowX AI leader arm
+    joint_names: list[str] = field(
+        default_factory=lambda: [
+            "joint_0",
+            "joint_1",
+            "joint_2",
+            "joint_3",
+            "joint_4",
+            "joint_5",
+            "left_carriage_joint",
+        ]
+    )

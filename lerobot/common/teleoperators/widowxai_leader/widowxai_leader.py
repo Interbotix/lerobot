@@ -58,8 +58,9 @@ class WidowXAILeader(Teleoperator):
             raise DeviceAlreadyConnectedError(f"{self} already connected")
 
         self.driver.configure(
-            serv_ip=self.config.ip_address,
+            model=trossen_arm.Model.wxai_v0,
             end_effector=trossen_arm.StandardEndEffector.wxai_v0_leader,
+            serv_ip=self.config.ip_address,
             clear_error=True,
         )
         if not self.is_calibrated and calibrate:

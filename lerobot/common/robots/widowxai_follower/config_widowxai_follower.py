@@ -37,12 +37,14 @@ class WidowXAIFollowerConfig(RobotConfig):
     # on another USB hub or PCIe card.
 
     # Joint names for the WidowX AI follower arm
-    joint_names: list[str] = [
-        "joint_0",
-        "joint_1",
-        "joint_2",
-        "joint_3",
-        "joint_4",
-        "joint_5",
-        "left_carriage_joint",
-    ]
+    joint_names: list[str] = field(
+        default_factory=lambda: [
+            "joint_0",
+            "joint_1",
+            "joint_2",
+            "joint_3",
+            "joint_4",
+            "joint_5",
+            "left_carriage_joint",
+        ]
+    )

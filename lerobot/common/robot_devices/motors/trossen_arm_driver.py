@@ -88,6 +88,11 @@ class TrossenArmDriver:
             "joint_6": [7, "4310"],
         }
 
+        if self.min_time_to_move_multiplier <= 0:
+            raise ValueError(
+                f"Invalid min_time_to_move_multiplier: {self.min_time_to_move_multiplier}. "
+                "It must be a positive number."
+            )
         # Minimum time to move for the arm
         self.MIN_TIME_TO_MOVE = self.min_time_to_move_multiplier / self.fps
 

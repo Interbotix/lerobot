@@ -309,7 +309,7 @@ class TrossenAIMobile:
         for name in self.follower_arms:
             if name in follower_pos:
                 state.append(follower_pos[name])
-        state.append(base_state.values())
+        state.append(torch.as_tensor(list(base_state.values())))
         state = torch.cat(state)
 
         # Capture images from cameras
@@ -326,9 +326,6 @@ class TrossenAIMobile:
         obs_dict["observation.state"] = state
         for name in self.cameras:
             obs_dict[f"observation.images.{name}"] = images[name]
-
-        obs_dict = {}
-        obs_dict["observation.state"] = state
 
         return obs_dict
 

@@ -269,6 +269,11 @@ def record(
     # Load pretrained policy
     policy = None if cfg.policy is None else make_policy(cfg.policy, ds_meta=dataset.meta)
 
+    # Disable the leader arms if a policy is provided,
+    # as they are not used during evaluation.
+    if policy is not None:
+        robot.leader_arms = []
+
     if not robot.is_connected:
         robot.connect()
 
@@ -345,6 +350,9 @@ def replay(
 
     dataset = LeRobotDataset(cfg.repo_id, root=cfg.root, episodes=[cfg.episode])
     actions = dataset.hf_dataset.select_columns("action")
+
+    # Disable leader arms as they are not used during replay
+    robot.leader_arms = []
 
     if not robot.is_connected:
         robot.connect()

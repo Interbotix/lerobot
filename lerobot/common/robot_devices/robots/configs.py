@@ -675,25 +675,25 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
         if self.camera_interface == "opencv":
             self.cameras = {
                 "cam_high": OpenCVCameraConfig(
-                    camera_index=20,
+                    camera_index=26,
                     fps=30,
                     width=640,
                     height=480,
                 ),
                 "cam_low": OpenCVCameraConfig(
-                    camera_index=38,
-                    fps=30,
-                    width=640,
-                    height=480,
-                ),
-                "cam_left_wrist": OpenCVCameraConfig(
                     camera_index=14,
                     fps=30,
                     width=640,
                     height=480,
                 ),
+                "cam_left_wrist": OpenCVCameraConfig(
+                    camera_index=8,
+                    fps=30,
+                    width=640,
+                    height=480,
+                ),
                 "cam_right_wrist": OpenCVCameraConfig(
-                    camera_index=26,
+                    camera_index=20,
                     fps=30,
                     width=640,
                     height=480,
@@ -910,10 +910,10 @@ class TrossenAIMobileRobotConfig(RobotConfig):
         elif self.camera_interface == "intel_realsense":
             # Troubleshooting: If one of your IntelRealSense cameras freeze during
             # data recording due to bandwidth limit, you might need to plug the camera
-            # on another USB hub or PCIe card.128422271327, 218622274938, 130322272628, 218622270304, 128422271347
+            # on another USB hub or PCIe card.
             self.cameras: dict[str, CameraConfig] = {
                 "cam_high": IntelRealSenseCameraConfig(
-                    serial_number=128422271327,
+                    serial_number=130322270184,
                     fps=30,
                     width=640,
                     height=480,
@@ -925,7 +925,7 @@ class TrossenAIMobileRobotConfig(RobotConfig):
                     height=480,
                 ),
                 "cam_right_wrist": IntelRealSenseCameraConfig(
-                    serial_number=130322272628,
+                    serial_number=128422271347,
                     fps=30,
                     width=640,
                     height=480,

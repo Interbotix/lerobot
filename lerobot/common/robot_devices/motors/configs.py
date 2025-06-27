@@ -47,3 +47,4 @@ class TrossenArmDriverConfig(MotorsBusConfig):
     ip: str
     model: dict[str, tuple[int, str]]
     mock: bool = False
+    min_time_to_move_multiplier: float = 3.0

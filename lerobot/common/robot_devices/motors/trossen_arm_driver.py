@@ -68,6 +68,7 @@ class TrossenArmDriver:
         self.ip = config.ip
         self.model = config.model
         self.mock = config.mock
+        self.min_time_to_move_multiplier = config.min_time_to_move_multiplier
         self.driver = None
         self.calibration = None
         self.is_connected = False
@@ -88,7 +89,7 @@ class TrossenArmDriver:
         }
 
         # Minimum time to move for the arm
-        self.MIN_TIME_TO_MOVE = 3.0 / self.fps
+        self.MIN_TIME_TO_MOVE = self.min_time_to_move_multiplier / self.fps
 
     def connect(self):
         print(f"Connecting to {self.model} arm at {self.ip}...")

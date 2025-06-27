@@ -634,43 +634,54 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
     # A value of 0.0 disables force feedback. A good starting value for a responsive experience is 0.1.
     force_feedback_gain: float = 0.0
 
+    # Multiplier for computing minimum time (in seconds) for the arm to reach a target position.
+    # The final goal time is computed as: min_time_to_move = multiplier / fps.
+    # A smaller multiplier results in faster (but potentially jerky) motion.
+    # A larger multiplier results in smoother motion but with increased lag.
+    # A recommended starting value is 3.0.
+    min_time_to_move_multiplier: float = 3.0
+
     # Set this according to the camera interface you want to use.
     # "intel_realsense" is the default and recommended option.
     # "opencv" is a fallback option that uses OpenCV to access the cameras.
     camera_interface: str = "intel_realsense"
 
-    leader_arms: dict[str, MotorsBusConfig] = field(
-        default_factory=lambda: {
-            "left": TrossenArmDriverConfig(
-                # wxai
-                ip="192.168.1.3",
-                model="V0_LEADER",
-            ),
-            "right": TrossenArmDriverConfig(
-                # wxai
-                ip="192.168.1.2",
-                model="V0_LEADER",
-            ),
-        }
-    )
+    leader_arms: dict[str, MotorsBusConfig] = field(init=False)  # Initialized later
 
-    follower_arms: dict[str, MotorsBusConfig] = field(
-        default_factory=lambda: {
-            "left": TrossenArmDriverConfig(
-                ip="192.168.1.5",
-                model="V0_FOLLOWER",
-            ),
-            "right": TrossenArmDriverConfig(
-                ip="192.168.1.4",
-                model="V0_FOLLOWER",
-            ),
-        }
-    )
+    follower_arms: dict[str, MotorsBusConfig] = field(init=False)  # Initialized later
+
     cameras: dict[str, CameraConfig] = field(init=False)  # Initialized later
 
     mock: bool = False
 
     def __post_init__(self):
+        self.leader_arms = {
+            "left": TrossenArmDriverConfig(
+                # wxai
+                ip="192.168.1.3",
+                model="V0_LEADER",
+                min_time_to_move_multiplier=self.min_time_to_move_multiplier,
+            ),
+            "right": TrossenArmDriverConfig(
+                # wxai
+                ip="192.168.1.2",
+                model="V0_LEADER",
+                min_time_to_move_multiplier=self.min_time_to_move_multiplier,
+            ),
+        }
+
+        self.follower_arms = {
+            "left": TrossenArmDriverConfig(
+                ip="192.168.1.5",
+                model="V0_FOLLOWER",
+                min_time_to_move_multiplier=self.min_time_to_move_multiplier,
+            ),
+            "right": TrossenArmDriverConfig(
+                ip="192.168.1.4",
+                model="V0_FOLLOWER",
+                min_time_to_move_multiplier=self.min_time_to_move_multiplier,
+            ),
+        }
         # Initialize cameras based on the selected camera interface
         if self.camera_interface == "opencv":
             self.cameras = {
@@ -757,35 +768,44 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
     # A value of 0.0 disables force feedback. A good starting value for a responsive experience is 0.1.
     force_feedback_gain: float = 0.0
 
+    # Multiplier for computing minimum time (in seconds) for the arm to reach a target position.
+    # The final goal time is computed as: min_time_to_move = multiplier / fps.
+    # A smaller multiplier results in faster (but potentially jerky) motion.
+    # A larger multiplier results in smoother motion but with increased lag.
+    # A recommended starting value is 3.0.
+    min_time_to_move_multiplier: float = 3.0
+
     # Set this according to the camera interface you want to use.
     # "intel_realsense" is the default and recommended option.
     # "opencv" is a fallback option that uses OpenCV to access the cameras.
     camera_interface: str = "intel_realsense"
 
-    leader_arms: dict[str, MotorsBusConfig] = field(
-        default_factory=lambda: {
-            "main": TrossenArmDriverConfig(
-                # wxai
-                ip="192.168.1.2",
-                model="V0_LEADER",
-            ),
-        }
-    )
+    leader_arms: dict[str, MotorsBusConfig] = field(init=False)  # Initialized later
 
-    follower_arms: dict[str, MotorsBusConfig] = field(
-        default_factory=lambda: {
-            "main": TrossenArmDriverConfig(
-                ip="192.168.1.3",
-                model="V0_FOLLOWER",
-            ),
-        }
-    )
+    follower_arms: dict[str, MotorsBusConfig] = field(init=False)  # Initialized later
 
     cameras: dict[str, CameraConfig] = field(init=False)  # Initialized later
 
     mock: bool = False
 
     def __post_init__(self):
+        self.leader_arms = {
+            "main": TrossenArmDriverConfig(
+                # wxai
+                ip="192.168.1.2",
+                model="V0_LEADER",
+                min_time_to_move_multiplier=self.min_time_to_move_multiplier,
+            ),
+        }
+
+        self.follower_arms = {
+            "main": TrossenArmDriverConfig(
+                ip="192.168.1.3",
+                model="V0_FOLLOWER",
+                min_time_to_move_multiplier=self.min_time_to_move_multiplier,
+            ),
+        }
+
         if self.camera_interface == "opencv":
             self.cameras: dict[str, CameraConfig] = {
                 "cam_main": OpenCVCameraConfig(
@@ -846,6 +866,13 @@ class TrossenAIMobileRobotConfig(RobotConfig):
     # A value of 0.0 disables force feedback. A good starting value for a responsive experience is 0.1.
     force_feedback_gain: float = 0.0
 
+    # Multiplier for computing minimum time (in seconds) for the arm to reach a target position.
+    # The final goal time is computed as: min_time_to_move = multiplier / fps.
+    # A smaller multiplier results in faster (but potentially jerky) motion.
+    # A larger multiplier results in smoother motion but with increased lag.
+    # A recommended starting value is 3.0.
+    min_time_to_move_multiplier: float = 3.0
+
     # Set this according to the camera interface you want to use.
     # "intel_realsense" is the default and recommended option.
     # "opencv" is a fallback option that uses OpenCV to access the cameras.
@@ -853,39 +880,43 @@ class TrossenAIMobileRobotConfig(RobotConfig):
 
     enable_motor_torque: bool = False
 
-    leader_arms: dict[str, MotorsBusConfig] = field(
-        default_factory=lambda: {
-            "left": TrossenArmDriverConfig(
-                # wxai
-                ip="192.168.1.3",
-                model="V0_LEADER",
-            ),
-            "right": TrossenArmDriverConfig(
-                # wxai
-                ip="192.168.1.2",
-                model="V0_LEADER",
-            ),
-        }
-    )
+    leader_arms: dict[str, MotorsBusConfig] = field(init=False)  # Initialized later
 
-    follower_arms: dict[str, MotorsBusConfig] = field(
-        default_factory=lambda: {
-            "left": TrossenArmDriverConfig(
-                ip="192.168.1.5",
-                model="V0_FOLLOWER",
-            ),
-            "right": TrossenArmDriverConfig(
-                ip="192.168.1.4",
-                model="V0_FOLLOWER",
-            ),
-        }
-    )
+    follower_arms: dict[str, MotorsBusConfig] = field(init=False)  # Initialized later
 
     cameras: dict[str, CameraConfig] = field(init=False)  # Initialized later
 
     mock: bool = False
 
     def __post_init__(self):
+        self.leader_arms = {
+            "left": TrossenArmDriverConfig(
+                # wxai
+                ip="192.168.1.3",
+                model="V0_LEADER",
+                min_time_to_move_multiplier=self.min_time_to_move_multiplier,
+            ),
+            "right": TrossenArmDriverConfig(
+                # wxai
+                ip="192.168.1.2",
+                model="V0_LEADER",
+                min_time_to_move_multiplier=self.min_time_to_move_multiplier,
+            ),
+        }
+
+        self.follower_arms = {
+            "left": TrossenArmDriverConfig(
+                ip="192.168.1.5",
+                model="V0_FOLLOWER",
+                min_time_to_move_multiplier=self.min_time_to_move_multiplier,
+            ),
+            "right": TrossenArmDriverConfig(
+                ip="192.168.1.4",
+                model="V0_FOLLOWER",
+                min_time_to_move_multiplier=self.min_time_to_move_multiplier,
+            ),
+        }
+
         if self.camera_interface == "opencv":
             self.cameras: dict[str, CameraConfig] = {
                 "cam_high": OpenCVCameraConfig(

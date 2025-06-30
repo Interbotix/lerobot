@@ -627,7 +627,7 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
     # Also, everything is expected to work safely out-of-the-box, but we highly advise to
     # first try to teleoperate the grippers only (by commenting out the rest of the motors in this yaml),
     # then to gradually add more motors (by uncommenting), until you can teleoperate both arms fully
-    max_relative_target: int | None = 5
+    max_relative_target: float | None = 5.0
 
     # Gain applied to external efforts sensed on the follower arm and transmitted to the leader arm.
     # This enables the user to feel external forces (e.g., contact with objects) through force feedback.
@@ -761,7 +761,7 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
     # Also, everything is expected to work safely out-of-the-box, but we highly advise to
     # first try to teleoperate the grippers only (by commenting out the rest of the motors in this yaml),
     # then to gradually add more motors (by uncommenting), until you can teleoperate both arms fully
-    max_relative_target: int | None = 5
+    max_relative_target: float | None = 5.0
 
     # Gain applied to external efforts sensed on the follower arm and transmitted to the leader arm.
     # This enables the user to feel external forces (e.g., contact with objects) through force feedback.
@@ -859,7 +859,7 @@ class TrossenAIMobileRobotConfig(RobotConfig):
     # Also, everything is expected to work safely out-of-the-box, but we highly advise to
     # first try to teleoperate the grippers only (by commenting out the rest of the motors in this yaml),
     # then to gradually add more motors (by uncommenting), until you can teleoperate both arms fully
-    max_relative_target: int | None = 5
+    max_relative_target: float | None = 5.0
 
     # Gain applied to external efforts sensed on the follower arm and transmitted to the leader arm.
     # This enables the user to feel external forces (e.g., contact with objects) through force feedback.

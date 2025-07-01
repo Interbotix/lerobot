@@ -19,7 +19,7 @@ import time
 
 import trossen_arm
 
-from lerobot.common.errors import DeviceAlreadyConnectedError, DeviceNotConnectedError
+from lerobot.errors import DeviceAlreadyConnectedError, DeviceNotConnectedError
 
 from ..teleoperator import Teleoperator
 from .config_widowxai_leader import WidowXAILeaderConfig
@@ -103,7 +103,7 @@ class WidowXAILeader(Teleoperator):
 
     def disconnect(self) -> None:
         if not self.is_connected:
-            DeviceNotConnectedError(f"{self} is not connected.")
+            raise DeviceNotConnectedError(f"{self} is not connected.")
 
         self.driver.cleanup()
         logger.info(f"{self} disconnected.")

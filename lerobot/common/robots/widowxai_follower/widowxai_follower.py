@@ -45,6 +45,7 @@ class WidowXAIFollower(Robot):
         self.config = config
         self.driver = trossen_arm.TrossenArmDriver()
         self.cameras = make_cameras_from_configs(config.cameras)
+        self.min_time_to_move = config.min_time_to_move_multiplier / self.config.loop_rate
 
     @property
     def _joint_ft(self) -> dict[str, type]:
@@ -143,14 +144,14 @@ class WidowXAIFollower(Robot):
         # Cap goal position when too far away from present position.
         # /!\ Slower fps expected due to reading from the follower.
         if self.config.max_relative_target is not None:
-            present_pos = self.driver.get_all_positions()
+            present_pos = dict(zip(self.config.joint_names, self.driver.get_all_positions(), strict=False))
             goal_present_pos = {key: (g_pos, present_pos[key]) for key, g_pos in goal_pos.items()}
             goal_pos = ensure_safe_goal_position(goal_present_pos, self.config.max_relative_target)
 
         # Send goal position to the arm
         self.driver.set_all_positions(
             goal_positions=[goal_pos[joint_name] for joint_name in self.config.joint_names],
-            goal_time=0.0,
+            goal_time=self.min_time_to_move,
             blocking=False,
         )
         return {f"{motor}.pos": val for motor, val in goal_pos.items()}

@@ -115,6 +115,7 @@ intelrealsense = [
 #     "pyrender @ git+https://github.com/mmatl/pyrender.git ; sys_platform == 'linux'",
 #     "pyrealsense2>=2.55.1.6486 ; sys_platform != 'darwin'"
 # ] # TODO: Currently not supported
+trossen_ai = ["pyrealsense2>=2.55.1.6486", "trossen-arm>=1.8.3", "pynput>=1.7.7", "trossen-slate>=0.0.3"]
 
 # Policies
 pi0 = ["lerobot[transformers-dep]"]

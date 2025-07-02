@@ -1,4 +1,4 @@
-# Copyright 2024 The HuggingFace Inc. team. All rights reserved.
+# Copyright 2025 The HuggingFace Inc. team. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -100,6 +100,11 @@ class WidowXAIFollower(Robot):
     def configure(self) -> None:
         # Set the arm to position control mode
         self.driver.set_all_modes(trossen_arm.Mode.position)
+        self.driver.set_all_positions(
+            self.config.staged_positions,
+            goal_time=2.0,
+            blocking=True,
+        )
 
     def get_observation(self) -> dict[str, Any]:
         if not self.is_connected:
@@ -109,7 +114,7 @@ class WidowXAIFollower(Robot):
         start = time.perf_counter()
         obs = self.driver.get_all_positions()
         obs_dict = {
-            f"{joint_name}.pos": val for joint_name, val in zip(self.config.joint_names, obs, strict=False)
+            f"{joint_name}.pos": val for joint_name, val in zip(self.config.joint_names, obs, strict=True)
         }
         dt_ms = (time.perf_counter() - start) * 1e3
         logger.debug(f"{self} read state: {dt_ms:.1f}ms")

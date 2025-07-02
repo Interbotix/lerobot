@@ -79,12 +79,19 @@ class WidowXAILeader(Teleoperator):
         pass
 
     def configure(self) -> None:
+        self.driver.set_all_modes(trossen_arm.Mode.position)
+        # Move the arm to the staged positions
+        self.driver.set_all_positions(
+            self.config.staged_positions,
+            goal_time=2.0,
+            blocking=True,
+        )
         self.driver.set_all_modes(trossen_arm.Mode.external_effort)
         # Set all external efforts to 0.0 to enable gravity compensation
         self.driver.set_all_external_efforts(
             [0.0] * len(self.config.joint_names),
             goal_time=0.0,
-            blocking=False,
+            blocking=True,
         )
 
     def get_action(self) -> dict[str, float]:
@@ -104,6 +111,20 @@ class WidowXAILeader(Teleoperator):
     def disconnect(self) -> None:
         if not self.is_connected:
             raise DeviceNotConnectedError(f"{self} is not connected.")
+
+        self.driver.set_all_modes(trossen_arm.Mode.position)
+        # Move the arm to the staged positions before disconnecting
+        self.driver.set_all_positions(
+            self.config.staged_positions,
+            goal_time=2.0,
+            blocking=True,
+        )
+        # Move the arm to the sleep position (all positions to 0.0)
+        self.driver.set_all_positions(
+            [0.0] * len(self.config.joint_names),
+            goal_time=2.0,
+            blocking=True,
+        )
 
         self.driver.cleanup()
         logger.info(f"{self} disconnected.")

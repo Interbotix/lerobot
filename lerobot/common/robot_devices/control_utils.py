@@ -282,8 +282,8 @@ def control_loop(
             events["exit_early"] = False
             break
 
-        if policy is not None:
-            policy.reset()
+    if policy is not None:
+        policy.reset()
 
 
 def reset_environment(robot, events, reset_time_s, fps):

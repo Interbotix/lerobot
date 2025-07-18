@@ -16,7 +16,6 @@
 
 import logging
 from functools import cached_property
-import time
 
 from lerobot.teleoperators.widowxai_leader.config_widowxai_leader import WidowXAILeaderConfig
 from lerobot.teleoperators.widowxai_leader.widowxai_leader import WidowXAILeader

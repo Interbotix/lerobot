@@ -98,7 +98,8 @@ class WidowXAILeader(Teleoperator):
         start = time.perf_counter()
         action = self.driver.get_all_positions()
         action_dict = {
-            f"{joint_name}.pos": val for joint_name, val in zip(
+            f"{joint_name}.pos": val
+            for joint_name, val in zip(
                 self.config.joint_names,
                 action,
                 strict=True,

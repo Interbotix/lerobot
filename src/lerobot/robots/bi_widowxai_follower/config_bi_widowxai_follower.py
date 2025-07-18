@@ -14,8 +14,6 @@
 
 from dataclasses import dataclass, field
 
-import numpy as np
-
 from lerobot.cameras import CameraConfig
 
 from ..config import RobotConfig

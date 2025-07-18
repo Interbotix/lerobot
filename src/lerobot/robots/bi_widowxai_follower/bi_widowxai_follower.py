@@ -17,15 +17,11 @@ import time
 from functools import cached_property
 from typing import Any
 
-import trossen_arm
-
 from lerobot.cameras.utils import make_cameras_from_configs
-from lerobot.errors import DeviceAlreadyConnectedError, DeviceNotConnectedError
 from lerobot.robots.widowxai_follower import WidowXAIFollower
 from lerobot.robots.widowxai_follower.config_widowxai_follower import WidowXAIFollowerConfig
 
 from ..robot import Robot
-from ..utils import ensure_safe_goal_position
 from .config_bi_widowxai_follower import BiWidowXAIFollowerConfig
 
 logger = logging.getLogger(__name__)

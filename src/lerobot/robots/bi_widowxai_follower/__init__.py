@@ -14,5 +14,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .bi_widowxai_leader import BiWidowXAILeader
-from .config_bi_widowxai_leader import BiWidowXAILeaderConfig
+from .bi_widowxai_follower import BiWidowXAIFollower
+from .config_bi_widowxai_follower import BiWidowXAIFollowerConfig

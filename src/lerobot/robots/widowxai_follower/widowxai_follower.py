@@ -37,19 +37,22 @@ class WidowXAIFollower(Robot):
     config_class = WidowXAIFollowerConfig
     name = "widowxai_follower"
 
-    def __init__(
-        self,
-        config: WidowXAIFollowerConfig,
-    ):
+    def __init__(self, config: WidowXAIFollowerConfig):
         super().__init__(config)
         self.config = config
+
         self.driver = trossen_arm.TrossenArmDriver()
         self.cameras = make_cameras_from_configs(config.cameras)
         self.min_time_to_move = config.min_time_to_move_multiplier / self.config.loop_rate
 
     @property
     def _joint_ft(self) -> dict[str, type]:
-        return {f"{joint_name}.pos": float for joint_name in self.config.joint_names}
+        joint_ft = {}
+        for joint_name in self.config.joint_names:
+            joint_ft[f"{joint_name}.pos"] = float
+            joint_ft[f"{joint_name}.vel"] = float
+            joint_ft[f"{joint_name}.eff"] = float
+        return joint_ft
 
     @property
     def _cameras_ft(self) -> dict[str, tuple]:
@@ -110,12 +113,33 @@ class WidowXAIFollower(Robot):
         if not self.is_connected:
             raise DeviceNotConnectedError(f"{self} is not connected.")
 
-        # Read arm position
+        # Create observation dictionary with joint positions, velocities, and efforts
         start = time.perf_counter()
-        obs = self.driver.get_all_positions()
-        obs_dict = {
-            f"{joint_name}.pos": val for joint_name, val in zip(self.config.joint_names, obs, strict=True)
-        }
+
+        robot_all_joint_outputs = self.driver.get_robot_output().joint.all
+        obs_dict = {}
+        obs_dict.update({
+            f"{joint_name}.pos": pos for joint_name, pos in zip(
+                self.config.joint_names,
+                robot_all_joint_outputs.positions,
+                strict=True,
+            )
+        })
+        obs_dict.update({
+            f"{joint_name}.vel": vel for joint_name, vel in zip(
+                self.config.joint_names,
+                robot_all_joint_outputs.velocities,
+                strict=True,
+            )
+        })
+        obs_dict.update({
+            f"{joint_name}.eff": eff for joint_name, eff in zip(
+                self.config.joint_names,
+                robot_all_joint_outputs.efforts,
+                strict=True,
+            )
+        })
+
         dt_ms = (time.perf_counter() - start) * 1e3
         logger.debug(f"{self} read state: {dt_ms:.1f}ms")
 

@@ -70,7 +70,10 @@ class WidowXAIFollower(Robot):
 
     @property
     def is_connected(self) -> bool:
-        return self.driver.get_is_configured() and all(cam.is_connected for cam in self.cameras.values())
+        return (
+            self.driver.get_is_configured()
+            and all(cam.is_connected for cam in self.cameras.values())
+        )
 
     def connect(self, calibrate: bool = True) -> None:
         if self.is_connected:
@@ -152,7 +155,7 @@ class WidowXAIFollower(Robot):
 
         return obs_dict
 
-    def send_action(self, action: dict[str, float]) -> dict[str, float]:
+    def send_action(self, action: dict[str, Any]) -> dict[str, Any]:
         """Command arm to move to a target joint configuration.
 
         The relative action magnitude may be clipped depending on the configuration parameter

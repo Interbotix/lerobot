@@ -65,15 +65,14 @@ class BiWidowXAIFollower(Robot):
 
     @property
     def _joint_ft(self) -> dict[str, type]:
-        joint_ft = {}
-        for joint_name in self.config.joint_names:
-            joint_ft[f"left_{joint_name}.pos"] = float
-            joint_ft[f"right_{joint_name}.pos"] = float
-            joint_ft[f"left_{joint_name}.vel"] = float
-            joint_ft[f"right_{joint_name}.vel"] = float
-            joint_ft[f"left_{joint_name}.eff"] = float
-            joint_ft[f"right_{joint_name}.eff"] = float
-        return joint_ft
+        return (
+            {f"left_{motor}.pos": float for motor in self.left_arm.config.joint_names}
+            | {f"right_{motor}.pos": float for motor in self.right_arm.config.joint_names}
+            | {f"left_{joint_name}.vel": float for joint_name in self.left_arm.config.joint_names}
+            | {f"right_{joint_name}.vel": float for joint_name in self.right_arm.config.joint_names}
+            | {f"left_{joint_name}.eff": float for joint_name in self.left_arm.config.joint_names}
+            | {f"right_{joint_name}.eff": float for joint_name in self.right_arm.config.joint_names}
+        )
 
     @property
     def _cameras_ft(self) -> dict[str, tuple]:

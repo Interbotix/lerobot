@@ -58,9 +58,8 @@ class BiWidowXAIFollower(Robot):
         )
 
         self.left_arm = WidowXAIFollower(left_arm_config)
-        self.left_arm.min_time_to_move = config.min_time_to_move_multiplier / self.config.loop_rate
         self.right_arm = WidowXAIFollower(right_arm_config)
-        self.right_arm.min_time_to_move = config.min_time_to_move_multiplier / self.config.loop_rate
+
         self.cameras = make_cameras_from_configs(config.cameras)
 
     @property

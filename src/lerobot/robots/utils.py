@@ -65,6 +65,10 @@ def make_robot_from_config(config: RobotConfig) -> Robot:
         from .widowxai_follower import WidowXAIFollower
 
         return WidowXAIFollower(config)
+    elif config.type == "bi_widowxai_follower":
+        from .bi_widowxai_follower import BiWidowXAIFollower
+
+        return BiWidowXAIFollower(config)
     elif config.type == "mock_robot":
         from tests.mocks.mock_robot import MockRobot
 

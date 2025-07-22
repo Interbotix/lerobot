@@ -31,7 +31,7 @@ from huggingface_hub.constants import REPOCARD_NAME
 from huggingface_hub.errors import RevisionNotFoundError
 
 from lerobot.common.constants import HF_LEROBOT_HOME
-from lerobot.common.datasets.backward_compatibility import SubVersionBackwardCompatibilityError
+from lerobot.common.datasets.backward_compatibility import SubVersionBackwardCompatibilityError,TROSSEN_V1_MESSAGE #added TROSSEN_V1_MESSAGE
 from lerobot.common.datasets.compute_stats import aggregate_stats, compute_episode_stats
 from lerobot.common.datasets.image_writer import AsyncImageWriter, write_image
 from lerobot.common.datasets.utils import (
@@ -110,7 +110,7 @@ class LeRobotDatasetMetadata:
         if not self.edit_mode:
             check_version_compatibility(self.repo_id, self._version, CODEBASE_VERSION)
             check_version_compatibility(
-                self.repo_id, self._subversion, TROSSEN_SUBVERSION, is_subversion=True
+                self.repo_id, self._subversion, TROSSEN_SUBVERSION, is_subversion=True, enforce_breaking_major = False #added enforce_breaking_major = False
             )
         self.tasks, self.task_to_task_index = load_tasks(self.root)
         self.episodes = load_episodes(self.root)
@@ -144,7 +144,9 @@ class LeRobotDatasetMetadata:
     def _subversion(self) -> packaging.version.Version:
         """Trossen subversion used to create this dataset."""
         if "trossen_subversion" not in self.info:
-            raise SubVersionBackwardCompatibilityError(self.repo_id, "v0.0")
+            #raise SubVersionBackwardCompatibilityError(self.repo_id, "v0.0") #no longer raise error
+            logging.warning(TROSSEN_V1_MESSAGE.format(repo_id=self.repo_id, version="v0.0")) #warning instead
+            return packaging.version.parse("v0.0") # return a default version instead of raising error                                           #anr added
         sub_version = self.info["trossen_subversion"]
         return packaging.version.parse(sub_version)
 

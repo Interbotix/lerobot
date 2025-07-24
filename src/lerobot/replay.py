@@ -52,6 +52,7 @@ from lerobot.robots import (  # noqa: F401
     Robot,
     RobotConfig,
     bi_so100_follower,
+    bi_widowxai_follower,
     hope_jr,
     koch_follower,
     make_robot_from_config,

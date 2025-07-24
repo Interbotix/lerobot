@@ -47,12 +47,7 @@ class WidowXAIFollower(Robot):
 
     @property
     def _joint_ft(self) -> dict[str, type]:
-        joint_ft = {}
-        for joint_name in self.config.joint_names:
-            joint_ft[f"{joint_name}.pos"] = float
-            joint_ft[f"{joint_name}.vel"] = float
-            joint_ft[f"{joint_name}.eff"] = float
-        return joint_ft
+        return {f"{joint_name}.pos": float for joint_name in self.config.joint_names}
 
     @property
     def _cameras_ft(self) -> dict[str, tuple]:

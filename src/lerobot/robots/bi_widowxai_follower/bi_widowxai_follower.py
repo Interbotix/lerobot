@@ -67,10 +67,6 @@ class BiWidowXAIFollower(Robot):
         return (
             {f"left_{joint_name}.pos": float for joint_name in self.left_arm.config.joint_names}
             | {f"right_{joint_name}.pos": float for joint_name in self.right_arm.config.joint_names}
-            | {f"left_{joint_name}.vel": float for joint_name in self.left_arm.config.joint_names}
-            | {f"right_{joint_name}.vel": float for joint_name in self.right_arm.config.joint_names}
-            | {f"left_{joint_name}.eff": float for joint_name in self.left_arm.config.joint_names}
-            | {f"right_{joint_name}.eff": float for joint_name in self.right_arm.config.joint_names}
         )
 
     @property

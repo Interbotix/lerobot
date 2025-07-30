@@ -37,7 +37,7 @@ RUN conda create -y -n $CONDA_ENV_NAME python=3.10 && \
     conda install -y -n $CONDA_ENV_NAME ffmpeg -c conda-forge
 
 # Clone LeRobot repository
-RUN git clone https://github.com/huggingface/lerobot.git /lerobot
+RUN git clone -b docker_helper https://github.com/Interbotix/lerobot.git /lerobot
 WORKDIR /lerobot
 
 # Activate env and install LeRobot with [pi0] extra
@@ -45,6 +45,7 @@ RUN /bin/bash -c "source $MINICONDA_DIR/bin/activate $CONDA_ENV_NAME && \
     pip install -e ."
 
 RUN pip3 install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
+RUN pip install pytest
 
 # Use bash as default shell
 SHELL ["/bin/bash", "-c"]

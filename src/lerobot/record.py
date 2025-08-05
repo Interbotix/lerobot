@@ -86,6 +86,7 @@ from lerobot.robots import (  # noqa: F401
     so100_follower,
     so101_follower,
     widowxai_follower,
+    bi_widowxai_follower,
 )
 from lerobot.teleoperators import (  # noqa: F401
     Teleoperator,
@@ -97,6 +98,7 @@ from lerobot.teleoperators import (  # noqa: F401
     so100_leader,
     so101_leader,
     widowxai_leader,
+    bi_widowxai_leader,
 )
 from lerobot.teleoperators.keyboard.teleop_keyboard import KeyboardTeleop
 from lerobot.utils.control_utils import (
@@ -111,6 +113,7 @@ from lerobot.utils.utils import (
     get_safe_torch_device,
     init_logging,
     log_say,
+    move_cursor_up,
 )
 from lerobot.utils.visualization_utils import _init_rerun, log_rerun_data
 
@@ -227,6 +230,9 @@ def record_loop(
 
     timestamp = 0
     start_episode_t = time.perf_counter()
+
+    display_len = max(len(key) for key in robot.action_features)
+
     while timestamp < control_time_s:
         start_loop_t = time.perf_counter()
 
@@ -282,6 +288,17 @@ def record_loop(
 
         dt_s = time.perf_counter() - start_loop_t
         busy_wait(1 / fps - dt_s)
+
+        loop_s = time.perf_counter() - start_loop_t
+
+        print("\n" + "-" * (display_len + 10))
+        print(f"{'NAME':<{display_len}} | {'NORM':>7}")
+        for motor, value in action.items():
+            print(f"{motor:<{display_len}} | {value:>7.2f}")
+        print(f"\ntime: {loop_s * 1e3:.2f}ms ({1 / loop_s:.0f} Hz)")
+
+        move_cursor_up(len(action) + 5)
+
 
         timestamp = time.perf_counter() - start_episode_t
 

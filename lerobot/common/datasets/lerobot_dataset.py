@@ -237,9 +237,9 @@ class LeRobotDatasetMetadata:
         return self.info["chunks_size"]
     
     @property
-    def operator(self) -> str | None:
-        """Operator used in recording this dataset."""
-        return self.info["operator"]
+    def operator(self) -> list[dict] | None:
+        """List of operators (each as a dict with 'name' and 'email') used in recording this dataset."""
+        return self.info.get("operator")
 
     def update_operator(self, name: str, email: str) -> None:
         """Append a new operator (name and email) to the list of operators used in recording this dataset."""
@@ -247,7 +247,6 @@ class LeRobotDatasetMetadata:
         if "operator" not in self.info or not isinstance(self.info["operator"], list):
             self.info["operator"] = []
         self.info["operator"].append(operator_entry)
-        print(f"Added new operator: {operator_entry}")
         write_info(self.info, self.root)
 
     def get_task_index(self, task: str) -> int | None:

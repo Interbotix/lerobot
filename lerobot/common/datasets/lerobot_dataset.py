@@ -235,6 +235,20 @@ class LeRobotDatasetMetadata:
     def chunks_size(self) -> int:
         """Max number of episodes per chunk."""
         return self.info["chunks_size"]
+    
+    @property
+    def operator(self) -> str | None:
+        """Operator used in recording this dataset."""
+        return self.info["operator"]
+
+    def update_operator(self, name: str, email: str) -> None:
+        """Append a new operator (name and email) to the list of operators used in recording this dataset."""
+        operator_entry = {"name": name, "email": email}
+        if "operator" not in self.info or not isinstance(self.info["operator"], list):
+            self.info["operator"] = []
+        self.info["operator"].append(operator_entry)
+        print(f"Added new operator: {operator_entry}")
+        write_info(self.info, self.root)
 
     def get_task_index(self, task: str) -> int | None:
         """

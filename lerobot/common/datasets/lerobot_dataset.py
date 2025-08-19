@@ -237,12 +237,15 @@ class LeRobotDatasetMetadata:
         return self.info["chunks_size"]
     
     @property
-    def operator(self) -> list[dict] | None:
-        """List of operators (each as a dict with 'name' and 'email') used in recording this dataset."""
+    def operator(self) -> list[dict]:
+        """List of operators (each as a dict with 'name' and 'email') used in recording this dataset. Returns an empty list if no operators are present."""
         return self.info.get("operator", [])
 
     def update_operator(self, name: str, email: str) -> None:
         """Append a new operator (name and email) to the list of operators used in recording this dataset."""
+        # Check if name is non-empty and email is in correct format
+        if not name or not isinstance(email, str) or "@" not in email:
+            raise ValueError("Invalid operator name or email.")
         operator_entry = {"name": name, "email": email}
         if "operator" not in self.info or not isinstance(self.info["operator"], list):
             self.info["operator"] = []

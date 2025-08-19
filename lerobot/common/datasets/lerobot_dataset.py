@@ -239,7 +239,7 @@ class LeRobotDatasetMetadata:
     @property
     def operator(self) -> list[dict] | None:
         """List of operators (each as a dict with 'name' and 'email') used in recording this dataset."""
-        return self.info.get("operator")
+        return self.info.get("operator", [])
 
     def update_operator(self, name: str, email: str) -> None:
         """Append a new operator (name and email) to the list of operators used in recording this dataset."""

@@ -15,6 +15,7 @@
 # limitations under the License.
 import contextlib
 import logging
+import re
 import shutil
 from pathlib import Path
 from typing import Callable
@@ -241,12 +242,16 @@ class LeRobotDatasetMetadata:
         """List of operators (each as a dict with 'name' and 'email') used in recording this dataset. Returns an empty list if no operators are present."""
         return self.info.get("operator", [])
 
-    def update_operator(self, name: str, email: str) -> None:
-        """Append a new operator (name and email) to the list of operators used in recording this dataset."""
-        # Check if name is non-empty and email is in correct format
-        if not name or not isinstance(email, str) or "@" not in email:
-            raise ValueError("Invalid operator name or email.")
-        operator_entry = {"name": name, "email": email}
+    def update_operator(self, name: str, email: str | None = None) -> None:
+        """Append a new operator (name and optional email) to the list of operators used in recording this dataset."""
+        if not isinstance(name, str) or not name:
+            raise ValueError("Operator name must be a non-empty string.")
+        operator_entry = {"name": name}
+        if email is not None:
+            email_regex = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+            if not isinstance(email, str) or not re.match(email_regex, email):
+                raise ValueError(f"Invalid email format. {email}")
+            operator_entry["email"] = email
         if "operator" not in self.info or not isinstance(self.info["operator"], list):
             self.info["operator"] = []
         self.info["operator"].append(operator_entry)

@@ -257,7 +257,8 @@ class LeRobotDatasetMetadata:
         # Check if operator with the same name already exists
         for op in self.info["operator"]:
             if op["name"] == name:
-                op["email"] = email
+                if email is not None:
+                    op["email"] = email
                 break
         else:
             self.info["operator"].append(operator_entry)

@@ -254,7 +254,13 @@ class LeRobotDatasetMetadata:
             operator_entry["email"] = email
         if "operator" not in self.info or not isinstance(self.info["operator"], list):
             self.info["operator"] = []
-        self.info["operator"].append(operator_entry)
+        # Check if operator with the same name already exists
+        for op in self.info["operator"]:
+            if op["name"] == name:
+                op["email"] = email
+                break
+        else:
+            self.info["operator"].append(operator_entry)
         write_info(self.info, self.root)
 
     def get_task_index(self, task: str) -> int | None:

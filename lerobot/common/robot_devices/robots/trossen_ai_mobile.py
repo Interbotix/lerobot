@@ -24,11 +24,7 @@ from lerobot.common.robot_devices.utils import (
 
 class TrossenAIMobile:
     def __init__(self, config: TrossenAIMobileRobotConfig | None = None, **kwargs):
-        if config is None:
-            self.config = TrossenAIMobileRobotConfig(**kwargs)
-        else:
-            # Overwrite config arguments using kwargs
-            self.config = replace(config, **kwargs)
+        self.config = config
         self.robot_type = self.config.type
         self.enable_motor_torque = self.config.enable_motor_torque
         self.leader_arms = make_motors_buses_from_configs(self.config.leader_arms)

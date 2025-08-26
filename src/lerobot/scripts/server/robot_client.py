@@ -52,10 +52,12 @@ from lerobot.configs.policies import PreTrainedConfig
 from lerobot.robots import (  # noqa: F401
     Robot,
     RobotConfig,
+    bi_widowxai_follower,
     koch_follower,
     make_robot_from_config,
     so100_follower,
     so101_follower,
+    widowxai_follower,
 )
 from lerobot.scripts.server.configs import RobotClientConfig
 from lerobot.scripts.server.constants import SUPPORTED_ROBOTS

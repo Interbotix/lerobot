@@ -153,6 +153,7 @@ all = [
     "lerobot[test]",
     "lerobot[video_benchmark]",
     "lerobot[aloha]",
+    "lerobot[trossen_ai]",
     "lerobot[pusht]",
     "lerobot[xarm]"
 ]

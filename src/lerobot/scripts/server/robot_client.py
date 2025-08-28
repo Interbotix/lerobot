@@ -55,6 +55,7 @@ from lerobot.robots import (  # noqa: F401
     bi_widowxai_follower,
     koch_follower,
     make_robot_from_config,
+    mobileai,
     so100_follower,
     so101_follower,
     widowxai_follower,

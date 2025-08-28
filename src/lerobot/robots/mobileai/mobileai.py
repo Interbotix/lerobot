@@ -34,7 +34,7 @@ class MobileAI(Robot):
     """
 
     config_class = MobileAIConfig
-    name = "bi_widowxai_follower"
+    name = "mobileai"
 
     def __init__(self, config: MobileAIConfig):
         super().__init__(config)

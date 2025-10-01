@@ -88,7 +88,7 @@ class RecordControlConfig(ControlConfig):
     # Resume recording on an existing dataset.
     resume: bool = False
     # Interval (in number of episodes) to save a checkpoint of the dataset.
-    save_interval: int = 10
+    save_interval: int = 1
 
     def __post_init__(self):
         # HACK: We parse again the cli args here to get the pretrained path if there was one.

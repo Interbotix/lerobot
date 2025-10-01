@@ -329,7 +329,7 @@ def record(
 
         recorded_episodes += 1
 
-        if recorded_episodes % cfg.save_interval == 0 and recorded_episodes > 0:
+        if cfg.save_interval>0 and recorded_episodes % cfg.save_interval == 0 and recorded_episodes > 0:
             log_say("Encoding and saving dataset batch...", cfg.play_sounds)
             dataset.save_episode_batch()
 
@@ -338,6 +338,10 @@ def record(
 
     log_say("Stop recording", cfg.play_sounds, blocking=True)
     stop_recording(robot, listener, cfg.display_cameras)
+
+    if cfg.save_interval<0:
+        log_say("Encoding and saving dataset batch...", cfg.play_sounds)
+        dataset.save_episode_batch()
 
     if cfg.push_to_hub:
         dataset.push_to_hub(tags=cfg.tags, private=cfg.private)

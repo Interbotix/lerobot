@@ -242,6 +242,7 @@ def record(
     cfg: RecordControlConfig,
 ) -> LeRobotDataset:
     # TODO(rcadene): Add option to record logs
+
     if cfg.resume:
         dataset = LeRobotDataset(
             cfg.repo_id,
@@ -323,9 +324,14 @@ def record(
             events["exit_early"] = False
             dataset.clear_episode_buffer()
             continue
+        
+        dataset.add_episode_to_batch()
 
-        dataset.save_episode()
         recorded_episodes += 1
+
+        if recorded_episodes % cfg.save_interval == 0 and recorded_episodes > 0:
+            log_say("Encoding and saving dataset batch...", cfg.play_sounds)
+            dataset.save_episode_batch()
 
         if events["stop_recording"]:
             break

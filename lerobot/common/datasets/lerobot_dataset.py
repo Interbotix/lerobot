@@ -529,6 +529,9 @@ class LeRobotDataset(torch.utils.data.Dataset):
         self.image_writer = None
         self.episode_buffer = None
 
+        # Save all episodes in a buffer before writing them to disk and encoding videos
+        self.episode_batch = []
+
         self.root.mkdir(exist_ok=True, parents=True)
 
         # Load metadata
@@ -884,6 +887,87 @@ class LeRobotDataset(torch.utils.data.Dataset):
 
         self.episode_buffer["size"] += 1
 
+    def add_episode_to_batch(self, episode_data: dict | None = None) -> None:
+        if episode_data is None:
+            episode_data = self.episode_buffer
+        self.episode_batch.append(episode_data)
+        episode_idx = self.meta.total_episodes + len(self.episode_batch)
+        self.episode_buffer = self.create_episode_buffer(episode_index=episode_idx)
+
+    def save_episode_batch(self, episode_data: dict | None = None) -> None:
+        """
+        This will save to disk the current episode in self.episode_buffer.
+
+        Args:
+            episode_data (dict | None, optional): Dict containing the episode data to save. If None, this will
+                save the current episode in self.episode_buffer, which is filled with 'add_frame'. Defaults to
+                None.
+        """
+        for episode_buffer in self.episode_batch:
+            validate_episode_buffer(episode_buffer, self.meta.total_episodes, self.features)
+
+            # size and task are special cases that won't be added to hf_dataset
+            episode_length = episode_buffer.pop("size")
+            tasks = episode_buffer.pop("task")
+            episode_tasks = list(set(tasks))
+            episode_index = episode_buffer["episode_index"]
+
+            episode_buffer["index"] = np.arange(self.meta.total_frames, self.meta.total_frames + episode_length)
+            episode_buffer["episode_index"] = np.full((episode_length,), episode_index)
+
+            # Add new tasks to the tasks dictionary
+            for task in episode_tasks:
+                task_index = self.meta.get_task_index(task)
+                if task_index is None:
+                    self.meta.add_task(task)
+
+            # Given tasks in natural language, find their corresponding task indices
+            episode_buffer["task_index"] = np.array([self.meta.get_task_index(task) for task in tasks])
+
+            for key, ft in self.features.items():
+                # index, episode_index, task_index are already processed above, and image and video
+                # are processed separately by storing image path and frame info as meta data
+                if key in ["index", "episode_index", "task_index"] or ft["dtype"] in ["image", "video"]:
+                    continue
+                episode_buffer[key] = np.stack(episode_buffer[key])
+
+            self._wait_image_writer()
+            self._save_episode_table(episode_buffer, episode_index)
+            ep_stats = compute_episode_stats(episode_buffer, self.features)
+
+            if len(self.meta.video_keys) > 0:
+                video_paths = self.encode_episode_videos(episode_index)
+                for key in self.meta.video_keys:
+                    episode_buffer[key] = video_paths[key]
+
+            # `meta.save_episode` be executed after encoding the videos
+            self.meta.save_episode(episode_index, episode_length, episode_tasks, ep_stats)
+
+            ep_data_index = get_episode_data_index(self.meta.episodes, [episode_index])
+            ep_data_index_np = {k: t.numpy() for k, t in ep_data_index.items()}
+            check_timestamps_sync(
+                episode_buffer["timestamp"],
+                episode_buffer["episode_index"],
+                ep_data_index_np,
+                self.fps,
+                self.tolerance_s,
+            )
+
+            video_files = list(self.root.rglob("*.mp4"))
+            assert len(video_files) == self.num_episodes * len(self.meta.video_keys)
+
+            parquet_files = list(self.root.rglob("*.parquet"))
+            assert len(parquet_files) == self.num_episodes
+
+        # delete images
+        img_dir = self.root / "images"
+        if img_dir.is_dir():
+            shutil.rmtree(self.root / "images")
+
+        # Clear the episode batch after saving
+        self.episode_batch = []
+
+
     def save_episode(self, episode_data: dict | None = None) -> None:
         """
         This will save to disk the current episode in self.episode_buffer.
@@ -1073,6 +1157,8 @@ class LeRobotDataset(torch.utils.data.Dataset):
 
         # TODO(aliberts, rcadene, alexander-soare): Merge this with OnlineBuffer/DataBuffer
         obj.episode_buffer = obj.create_episode_buffer()
+
+        obj.episode_batch = []
 
         obj.episodes = None
         obj.hf_dataset = obj.create_hf_dataset()

@@ -329,7 +329,7 @@ def record(
 
         recorded_episodes += 1
 
-        if cfg.save_interval>0 and recorded_episodes % cfg.save_interval == 0 and recorded_episodes > 0:
+        if cfg.save_interval > 0 and recorded_episodes % cfg.save_interval == 0 and recorded_episodes > 0:
             log_say("Encoding and saving dataset batch...", cfg.play_sounds)
             dataset.save_episode_batch()
 

@@ -99,13 +99,13 @@ python lerobot/scripts/control_robot.py \
   --control.type=record \
   --control.fps=30 \
   --control.single_task="Grasp a lego block and put it in the bin." \
-  --control.repo_id=TrossenRoboticsCommunity/trossen_ai_stationary_test_00 \
+  --control.repo_id=${HF_USER}/trossen_ai_stationary_test \
   --control.tags='["tutorial"]' \
-  --control.warmup_time_s=2 \
-  --control.episode_time_s=5 \
-  --control.reset_time_s=2 \
-  --control.num_episodes=6 \
-  --control.push_to_hub=false \
+  --control.warmup_time_s=5 \
+  --control.episode_time_s=30 \
+  --control.reset_time_s=30 \
+  --control.num_episodes=2 \
+  --control.push_to_hub=true \
   --control.num_image_writer_threads_per_camera=8
 ```
 
@@ -119,7 +119,7 @@ echo ${HF_USER}/trossen_ai_stationary_test
 If you didn't upload with `--control.push_to_hub=false`, you can also visualize it locally with:
 ```bash
 python lerobot/scripts/visualize_dataset_html.py \
-  --repo-id TrossenRoboticsCommunity/trossen_ai_stationary_test_00
+  --repo-id ${HF_USER}/trossen_ai_stationary_test
 ```
 
 ## Replay an episode
@@ -132,7 +132,7 @@ python lerobot/scripts/control_robot.py \
   --robot.max_relative_target=null \
   --control.type=replay \
   --control.fps=30 \
-  --control.repo_id=TrossenRoboticsCommunity/trossen_ai_stationary_block_stacking \
+  --control.repo_id=${HF_USER}/trossen_ai_stationary_test \
   --control.episode=0
 ```
 

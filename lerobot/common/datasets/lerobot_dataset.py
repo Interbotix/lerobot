@@ -894,15 +894,14 @@ class LeRobotDataset(torch.utils.data.Dataset):
         episode_idx = self.meta.total_episodes + len(self.episode_batch)
         self.episode_buffer = self.create_episode_buffer(episode_index=episode_idx)
 
-    def save_episode_batch(self, episode_data: dict | None = None) -> None:
+    def save_episode_batch(self) -> None:
         """
-        This will save to disk the current episode in self.episode_buffer.
+        This will save to disk all the episodes in self.episode_batch. After saving, the episode_batch
+        will be cleared. Note that this requires self.episode_batch to be non-empty.
+        """
+        if not self.episode_batch:
+            raise ValueError("No episodes to save.")
 
-        Args:
-            episode_data (dict | None, optional): Dict containing the episode data to save. If None, this will
-                save the current episode in self.episode_buffer, which is filled with 'add_frame'. Defaults to
-                None.
-        """
         for episode_buffer in self.episode_batch:
             validate_episode_buffer(episode_buffer, self.meta.total_episodes, self.features)
 

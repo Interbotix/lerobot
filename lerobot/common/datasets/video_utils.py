@@ -20,6 +20,7 @@ import subprocess
 import warnings
 from collections import OrderedDict
 from dataclasses import dataclass, field
+from  lerobot.common.constants import GPU_ENCODING
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -242,7 +243,6 @@ def decode_video_frames_torchcodec(
     assert len(timestamps) == len(closest_frames)
     return closest_frames
 
-
 def encode_video_frames(
     imgs_dir: Path | str,
     video_path: Path | str,
@@ -255,10 +255,23 @@ def encode_video_frames(
     log_level: str | None = "error",
     overwrite: bool = False,
 ) -> None:
-    """More info on ffmpeg arguments tuning on `benchmark/video/README.md`"""
+    """More info on ffmpeg arguments tuning on `benchmark/video/README.md`
+    Set use_gpu=True to use Nvidia GPU (requires compatible vcodec, e.g. h264_nvenc or hevc_nvenc).
+    """
+
+    # Use env variable to determine if GPU encoding should be used
+    use_gpu = GPU_ENCODING
+    gpu_id = 0
+
     video_path = Path(video_path)
     imgs_dir = Path(imgs_dir)
     video_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # If use_gpu is True, override vcodec to a GPU-compatible codec if not already set
+    if use_gpu:
+        # Only override if user didn't explicitly set a GPU codec
+        if vcodec not in ["h264_nvenc", "hevc_nvenc"]:
+            vcodec = "h264_nvenc"
 
     ffmpeg_args = OrderedDict(
         [
@@ -272,14 +285,23 @@ def encode_video_frames(
 
     if g is not None:
         ffmpeg_args["-g"] = str(g)
+        if use_gpu:
+            ffmpeg_args["-g"] = "30"
 
     if crf is not None:
-        ffmpeg_args["-crf"] = str(crf)
+        # For NVENC, use -cq instead of -crf for quality control
+        if use_gpu and vcodec in ["h264_nvenc", "hevc_nvenc"]:
+            ffmpeg_args["-cq"] = str(crf)
+        else:
+            ffmpeg_args["-crf"] = str(crf)
 
     if fast_decode:
         key = "-svtav1-params" if vcodec == "libsvtav1" else "-tune"
         value = f"fast-decode={fast_decode}" if vcodec == "libsvtav1" else "fastdecode"
         ffmpeg_args[key] = value
+
+    if use_gpu:
+        ffmpeg_args["-gpu"] = str(gpu_id)
 
     if log_level is not None:
         ffmpeg_args["-loglevel"] = str(log_level)
@@ -289,7 +311,6 @@ def encode_video_frames(
         ffmpeg_args.append("-y")
 
     ffmpeg_cmd = ["ffmpeg"] + ffmpeg_args + [str(video_path)]
-    # redirect stdin to subprocess.DEVNULL to prevent reading random keyboard inputs from terminal
     subprocess.run(ffmpeg_cmd, check=True, stdin=subprocess.DEVNULL)
 
     if not video_path.exists():

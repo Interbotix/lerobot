@@ -344,14 +344,17 @@ def record(
             log_say("Encoding and saving dataset batch...", cfg.play_sounds)
             dataset.save_episode_batch()
 
-        if cfg.push_to_hub:
-            dataset.push_to_hub(tags=cfg.tags, private=cfg.private)
-
     except Exception as e:
         logging.error(f"An exception occurred: {e}", exc_info=True)
     finally:
         logging.info("Saving dataset...")
-        dataset.save_episode_batch()
+        try:
+            dataset.save_episode_batch()
+        except Exception as save_exc:
+            logging.error(f"Exception occurred while saving dataset in finally block: {save_exc}", exc_info=True)
+
+    if cfg.push_to_hub:
+        dataset.push_to_hub(tags=cfg.tags, private=cfg.private)
 
     log_say("Exiting", cfg.play_sounds)
     return dataset

@@ -292,59 +292,66 @@ def record(
         robot.teleop_safety_stop()
 
     recorded_episodes = 0
-    while True:
-        if recorded_episodes >= cfg.num_episodes:
-            break
+    try:
+        while True:
+            if recorded_episodes >= cfg.num_episodes:
+                break
 
-        log_say(f"Recording episode {dataset.num_episodes}", cfg.play_sounds)
-        record_episode(
-            robot=robot,
-            dataset=dataset,
-            events=events,
-            episode_time_s=cfg.episode_time_s,
-            display_cameras=cfg.display_cameras,
-            policy=policy,
-            fps=cfg.fps,
-            single_task=cfg.single_task,
-        )
+            log_say(f"Recording episode {dataset.num_episodes}", cfg.play_sounds)
+            record_episode(
+                robot=robot,
+                dataset=dataset,
+                events=events,
+                episode_time_s=cfg.episode_time_s,
+                display_cameras=cfg.display_cameras,
+                policy=policy,
+                fps=cfg.fps,
+                single_task=cfg.single_task,
+            )
 
-        # Execute a few seconds without recording to give time to manually reset the environment
-        # Current code logic doesn't allow to teleoperate during this time.
-        # TODO(rcadene): add an option to enable teleoperation during reset
-        # Skip reset for the last episode to be recorded
-        if not events["stop_recording"] and (
-            (recorded_episodes < cfg.num_episodes - 1) or events["rerecord_episode"]
-        ):
-            log_say("Reset the environment", cfg.play_sounds)
-            reset_environment(robot, events, cfg.reset_time_s, cfg.fps)
+            # Execute a few seconds without recording to give time to manually reset the environment
+            # Current code logic doesn't allow to teleoperate during this time.
+            # TODO(rcadene): add an option to enable teleoperation during reset
+            # Skip reset for the last episode to be recorded
+            if not events["stop_recording"] and (
+                (recorded_episodes < cfg.num_episodes - 1) or events["rerecord_episode"]
+            ):
+                log_say("Reset the environment", cfg.play_sounds)
+                reset_environment(robot, events, cfg.reset_time_s, cfg.fps)
 
-        if events["rerecord_episode"]:
-            log_say("Re-record episode", cfg.play_sounds)
-            events["rerecord_episode"] = False
-            events["exit_early"] = False
-            dataset.clear_episode_buffer()
-            continue
-        
-        dataset.add_episode_to_batch()
+            if events["rerecord_episode"]:
+                log_say("Re-record episode", cfg.play_sounds)
+                events["rerecord_episode"] = False
+                events["exit_early"] = False
+                dataset.clear_episode_buffer()
+                continue
+            
+            dataset.add_episode_to_batch()
 
-        recorded_episodes += 1
+            recorded_episodes += 1
 
-        if cfg.save_interval > 0 and cfg.save_interval != 0 and recorded_episodes % cfg.save_interval == 0 and recorded_episodes > 0:
+            if cfg.save_interval > 0 and cfg.save_interval != 0 and recorded_episodes % cfg.save_interval == 0 and recorded_episodes > 0:
+                log_say("Encoding and saving dataset batch...", cfg.play_sounds)
+                dataset.save_episode_batch()
+
+            if events["stop_recording"]:
+                break
+
+        log_say("Stop recording", cfg.play_sounds, blocking=True)
+        stop_recording(robot, listener, cfg.display_cameras)
+
+        if cfg.save_interval <= 0 or (recorded_episodes % cfg.save_interval != 0):
             log_say("Encoding and saving dataset batch...", cfg.play_sounds)
             dataset.save_episode_batch()
 
-        if events["stop_recording"]:
-            break
+        if cfg.push_to_hub:
+            dataset.push_to_hub(tags=cfg.tags, private=cfg.private)
 
-    log_say("Stop recording", cfg.play_sounds, blocking=True)
-    stop_recording(robot, listener, cfg.display_cameras)
-
-    if cfg.save_interval <= 0 or (recorded_episodes % cfg.save_interval != 0):
-        log_say("Encoding and saving dataset batch...", cfg.play_sounds)
+    except Exception as e:
+        logging.error(f"An exception occurred: {e}", exc_info=True)
+    finally:
+        logging.info("Saving dataset...")
         dataset.save_episode_batch()
-
-    if cfg.push_to_hub:
-        dataset.push_to_hub(tags=cfg.tags, private=cfg.private)
 
     log_say("Exiting", cfg.play_sounds)
     return dataset

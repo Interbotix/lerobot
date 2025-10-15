@@ -39,6 +39,8 @@ default_cache_path = Path(HF_HOME) / "lerobot"
 HF_LEROBOT_HOME = Path(os.getenv("HF_LEROBOT_HOME", default_cache_path)).expanduser()
 
 GPU_ENCODING = os.getenv("LEROBOT_GPU_ENCODING", "0") == "1"
+GPU_ID = int(os.getenv("LEROBOT_GPU_ID", "0"))
+GOP_SIZE = int(os.getenv("LEROBOT_GOP_SIZE", "30"))
 
 if "LEROBOT_HOME" in os.environ:
     raise ValueError(

@@ -20,7 +20,6 @@ import subprocess
 import warnings
 from collections import OrderedDict
 from dataclasses import dataclass, field
-from  lerobot.common.constants import GPU_ENCODING
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -29,6 +28,8 @@ import torch
 import torchvision
 from datasets.features.features import register_feature
 from PIL import Image
+
+from lerobot.common.constants import GOP_SIZE, GPU_ENCODING, GPU_ID
 
 
 def get_safe_default_codec():
@@ -243,6 +244,7 @@ def decode_video_frames_torchcodec(
     assert len(timestamps) == len(closest_frames)
     return closest_frames
 
+
 def encode_video_frames(
     imgs_dir: Path | str,
     video_path: Path | str,
@@ -255,23 +257,15 @@ def encode_video_frames(
     log_level: str | None = "error",
     overwrite: bool = False,
 ) -> None:
-    """More info on ffmpeg arguments tuning on `benchmark/video/README.md`
-    Set use_gpu=True to use Nvidia GPU (requires compatible vcodec, e.g. h264_nvenc or hevc_nvenc).
-    """
+    """More info on ffmpeg arguments tuning on `benchmark/video/README.md`"""
 
     # Use env variable to determine if GPU encoding should be used
     use_gpu = GPU_ENCODING
-    gpu_id = 0
+    gpu_id = GPU_ID
 
     video_path = Path(video_path)
     imgs_dir = Path(imgs_dir)
     video_path.parent.mkdir(parents=True, exist_ok=True)
-
-    # If use_gpu is True, override vcodec to a GPU-compatible codec if not already set
-    if use_gpu:
-        # Only override if user didn't explicitly set a GPU codec
-        if vcodec not in ["h264_nvenc", "hevc_nvenc"]:
-            vcodec = "h264_nvenc"
 
     ffmpeg_args = OrderedDict(
         [
@@ -283,10 +277,23 @@ def encode_video_frames(
         ]
     )
 
+    # If use_gpu is True, override vcodec to a GPU-compatible codec if not already set
+    if use_gpu:
+        # Only override if user didn't explicitly set a GPU codec
+        if vcodec not in ["h264_nvenc", "hevc_nvenc"]:
+            vcodec = "h264_nvenc"
+            ffmpeg_args["-vcodec"] = vcodec
+        ffmpeg_args["-gpu"] = str(gpu_id)
+
     if g is not None:
         ffmpeg_args["-g"] = str(g)
+        # For GPU encoding, the GOP (Group of Pictures) size should be a multiple of the framerate (e.g., 30, 60, 90)
+        # to ensure optimal keyframe placement and compatibility with hardware encoders.
+        # This helps with efficient seeking and decoding on most players and streaming platforms.
+        # The GOP size is 30 by default, which is a good balance for 30fps videos.
+        # You can adjust it by setting the GOP_SIZE environment variable.
         if use_gpu:
-            ffmpeg_args["-g"] = "30"
+            ffmpeg_args["-g"] = str(GOP_SIZE)
 
     if crf is not None:
         # For NVENC, use -cq instead of -crf for quality control
@@ -299,9 +306,6 @@ def encode_video_frames(
         key = "-svtav1-params" if vcodec == "libsvtav1" else "-tune"
         value = f"fast-decode={fast_decode}" if vcodec == "libsvtav1" else "fastdecode"
         ffmpeg_args[key] = value
-
-    if use_gpu:
-        ffmpeg_args["-gpu"] = str(gpu_id)
 
     if log_level is not None:
         ffmpeg_args["-loglevel"] = str(log_level)

@@ -686,7 +686,7 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
         if self.camera_interface == "opencv":
             self.cameras = {
                 "cam_high": OpenCVCameraConfig(
-                    camera_index=26,
+                    camera_index=16,
                     fps=30,
                     width=640,
                     height=480,
@@ -704,7 +704,7 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
                     height=480,
                 ),
                 "cam_right_wrist": OpenCVCameraConfig(
-                    camera_index=20,
+                    camera_index=10,
                     fps=30,
                     width=640,
                     height=480,
@@ -717,25 +717,25 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
             # on another USB hub or PCIe card.
             self.cameras: dict[str, CameraConfig] = {
                 "cam_high": IntelRealSenseCameraConfig(
-                    serial_number=218622274938,
+                    serial_number=230322270292,
                     fps=30,
                     width=640,
                     height=480,
                 ),
                 "cam_low": IntelRealSenseCameraConfig(
-                    serial_number=130322272628,
+                    serial_number=230322271134,
                     fps=30,
                     width=640,
                     height=480,
                 ),
                 "cam_left_wrist": IntelRealSenseCameraConfig(
-                    serial_number=128422271347,
+                    serial_number=230322270548,
                     fps=30,
                     width=640,
                     height=480,
                 ),
                 "cam_right_wrist": IntelRealSenseCameraConfig(
-                    serial_number=218622270304,
+                    serial_number=230422272861,
                     fps=30,
                     width=640,
                     height=480,

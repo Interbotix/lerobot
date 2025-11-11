@@ -356,10 +356,20 @@ class LeRobotDatasetMetadata:
     ) -> "LeRobotDatasetMetadata":
         """Creates metadata for a LeRobotDataset."""
         obj = cls.__new__(cls)
-        obj.repo_id = repo_id
-        obj.root = Path(root) if root is not None else HF_LEROBOT_HOME / repo_id
 
-        obj.root.mkdir(parents=True, exist_ok=False)
+        obj.repo_id = repo_id
+        if root is not None:
+            # Treat --control.root as a parent directory and put the dataset under <root>/<repo_id>
+            # If repo_id contains '/', we'll create nested subdirectories (e.g., org/name).
+            parent = Path(root)
+            obj.root = parent / repo_id
+            # Ensure the parent exists; the dataset directory itself must be new.
+            obj.root.parent.mkdir(parents=True, exist_ok=True)
+            obj.root.mkdir(parents=True, exist_ok=False)
+        else:
+            # Default: place under HF_LEROBOT_HOME/<repo_id>
+            obj.root = HF_LEROBOT_HOME / repo_id
+            obj.root.mkdir(parents=True, exist_ok=False)
 
         if robot is not None:
             features = get_features_from_robot(robot, use_videos)

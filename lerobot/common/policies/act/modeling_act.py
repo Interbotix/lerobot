@@ -157,7 +157,8 @@ class ACTPolicy(PreTrainedPolicy):
         ).mean()
 
         loss_dict = {"l1_loss": l1_loss.item()}
-        if self.config.use_vae:
+        # Only compute KLD loss during training (not during eval)
+        if self.config.use_vae and self.training:
             # Calculate Dₖₗ(latent_pdf || standard_normal). Note: After computing the KL-divergence for
             # each dimension independently, we sum over the latent dimension to get the total
             # KL-divergence per batch element, then take the mean over the batch.
@@ -169,6 +170,9 @@ class ACTPolicy(PreTrainedPolicy):
             loss = l1_loss + mean_kld * self.config.kl_weight
         else:
             loss = l1_loss
+            if self.config.use_vae and not self.training:
+                # Set kld_loss to 0 during evaluation
+                loss_dict["kld_loss"] = 0.0
 
         return loss, loss_dict
 

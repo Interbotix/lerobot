@@ -568,6 +568,13 @@ class LeRobotDataset(torch.utils.data.Dataset):
             self.hf_dataset = self.load_hf_dataset()
 
         self.episode_data_index = get_episode_data_index(self.meta.episodes, self.episodes)
+        
+        # Create mapping from actual episode indices to positions in filtered dataset
+        # This is needed when using episode filtering (self.episodes is not None)
+        if self.episodes is not None:
+            self.episode_index_to_position = {ep_idx: pos for pos, ep_idx in enumerate(self.episodes)}
+        else:
+            self.episode_index_to_position = None
 
         # Check timestamps
         timestamps = torch.stack(self.hf_dataset["timestamp"]).numpy()
@@ -728,8 +735,10 @@ class LeRobotDataset(torch.utils.data.Dataset):
             return get_hf_features_from_features(self.features)
 
     def _get_query_indices(self, idx: int, ep_idx: int) -> tuple[dict[str, list[int | bool]]]:
-        ep_start = self.episode_data_index["from"][ep_idx]
-        ep_end = self.episode_data_index["to"][ep_idx]
+        # Map actual episode index to position in filtered dataset if needed
+        ep_pos = self.episode_index_to_position[ep_idx] if self.episode_index_to_position else ep_idx
+        ep_start = self.episode_data_index["from"][ep_pos]
+        ep_end = self.episode_data_index["to"][ep_pos]
         query_indices = {
             key: [max(ep_start.item(), min(ep_end.item() - 1, idx + delta)) for delta in delta_idx]
             for key, delta_idx in self.delta_indices.items()
@@ -1175,6 +1184,7 @@ class LeRobotDataset(torch.utils.data.Dataset):
         obj.delta_timestamps = None
         obj.delta_indices = None
         obj.episode_data_index = None
+        obj.episode_index_to_position = None
         obj.video_backend = video_backend if video_backend is not None else get_safe_default_codec()
         return obj
 

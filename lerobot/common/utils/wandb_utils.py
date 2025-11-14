@@ -26,15 +26,26 @@ from lerobot.common.constants import PRETRAINED_MODEL_DIR
 from lerobot.configs.train import TrainPipelineConfig
 
 
+def _truncate_tag(tag: str, max_length: int = 64) -> str:
+    """Truncate a tag to fit WandB's max length requirement (1-64 characters)."""
+    if len(tag) <= max_length:
+        return tag
+    # Truncate from the middle to keep prefix and suffix meaningful
+    # e.g., "dataset:very_long_repo_id_name" -> "dataset:very_long...id_name"
+    prefix_len = max_length // 2 - 2
+    suffix_len = max_length - prefix_len - 3  # 3 for "..."
+    return f"{tag[:prefix_len]}...{tag[-suffix_len:]}"
+
+
 def cfg_to_group(cfg: TrainPipelineConfig, return_list: bool = False) -> list[str] | str:
     """Return a group name for logging. Optionally returns group name as list."""
     lst = [
-        f"policy:{cfg.policy.type}",
-        f"dataset:{cfg.dataset.repo_id}",
-        f"seed:{cfg.seed}",
+        _truncate_tag(f"policy:{cfg.policy.type}"),
+        _truncate_tag(f"dataset:{cfg.dataset.repo_id}"),
+        _truncate_tag(f"seed:{cfg.seed}"),
     ]
     if cfg.env is not None:
-        lst.append(f"env:{cfg.env.type}")
+        lst.append(_truncate_tag(f"env:{cfg.env.type}"))
     return lst if return_list else "-".join(lst)
 
 

@@ -277,9 +277,11 @@ def train(cfg: TrainPipelineConfig):
         train_dataset = make_lerobot_dataset_with_episodes(cfg, train_episodes)
         logging.info(f"Train set (num_episodes={train_dataset.num_episodes}, num_frames={train_dataset.num_frames}): {train_episodes}")
         
-        if cfg.eval_freq > 0:
+        if cfg.eval_freq > 0 and len(eval_episodes) > 0:
             eval_dataset = make_lerobot_dataset_with_episodes(cfg, eval_episodes)
             logging.info(f"Eval set (num_episodes={eval_dataset.num_episodes}, num_frames={eval_dataset.num_frames}): {eval_episodes}")
+        elif cfg.eval_freq > 0:
+            logging.warning("Evaluation is enabled (eval_freq > 0) but no eval episodes found in splits.yaml. Skipping evaluation.")
         
         # Save a copy of splits.yaml to the output directory for reproducibility
         if splits_file_path and splits_file_path.exists():

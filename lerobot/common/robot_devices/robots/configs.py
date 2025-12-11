@@ -653,6 +653,15 @@ class TrossenAIStationaryRobotConfig(ManipulatorRobotConfig):
     cameras: dict[str, CameraConfig] = field(init=False)  # Initialized later
 
     mock: bool = False
+    
+    #simple per-gripper linear mapping: follower's end-effector position = scale * leader_ee + offset (in metres)
+    gripper_scale: float = 1.0
+    gripper_offset: float = 0#-0.005 #in metres. setting this to 0.01 yields 2cm opened follower's gripper when leader gripper is fully closed. 1cm per finger from the centre of the gripper.
+
+    '''
+    [ERROR] [Motor Interface] Joint 6 position limit exceeded: expected in range [-0.004000, 0.044000], motor reported -0.005256. Setting to idle.
+
+    '''
 
     def __post_init__(self):
         self.leader_arms = {

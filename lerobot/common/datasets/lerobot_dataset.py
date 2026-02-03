@@ -900,7 +900,8 @@ class LeRobotDataset(torch.utils.data.Dataset):
         will be cleared. Note that this requires self.episode_batch to be non-empty.
         """
         if not self.episode_batch:
-            raise ValueError("No episodes to save.")
+            print("No episodes to save.")
+            return
 
         for episode_buffer in self.episode_batch:
             validate_episode_buffer(episode_buffer, self.meta.total_episodes, self.features)

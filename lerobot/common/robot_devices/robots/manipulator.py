@@ -231,6 +231,9 @@ class ManipulatorRobot:
             for arms in self.follower_arms:
                 self.follower_arms[arms].write("Reset", 1)
             time.sleep(2)
+
+    def teleop_start(self):
+        if self.robot_type in ["trossen_ai_stationary", "trossen_ai_solo"]:
             for arms in self.leader_arms:
                 self.leader_arms[arms].write("Torque_Enable", 0)
             for arms in self.follower_arms:

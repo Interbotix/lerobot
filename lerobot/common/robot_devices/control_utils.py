@@ -290,17 +290,19 @@ def reset_environment(robot, events, reset_time_s, fps):
     # TODO(rcadene): refactor warmup_record and reset_environment
     if has_method(robot, "teleop_safety_stop"):
         robot.teleop_safety_stop()
-
-    if robot.robot_type in ["trossen_ai_stationary", "trossen_ai_solo", "trossen_ai_mobile"]:
-        time.sleep(reset_time_s)
-    else:
-        control_loop(
-            robot=robot,
-            control_time_s=reset_time_s,
-            events=events,
-            fps=fps,
-            teleoperate=True,
-        )
+    
+    if has_method(robot, "teleop_start"):
+        robot.teleop_start()
+    
+    control_loop(
+        robot=robot,
+        control_time_s=reset_time_s,
+        events=events,
+        fps=fps,
+        teleoperate=True,
+    )
+    if has_method(robot, "teleop_safety_stop"):
+        robot.teleop_safety_stop()
 
 
 def stop_recording(robot, listener, display_cameras):

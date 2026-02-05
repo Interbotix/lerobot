@@ -293,7 +293,7 @@ def reset_environment(robot, events, reset_time_s, fps):
 
     if has_method(robot, "enable_teleoperation"):
         robot.enable_teleoperation()
-    
+
     control_loop(
         robot=robot,
         control_time_s=reset_time_s,

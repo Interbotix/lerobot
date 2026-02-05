@@ -238,7 +238,7 @@ class ManipulatorRobot:
                 self.leader_arms[arms].write("Torque_Enable", 0)
             for arms in self.follower_arms:
                 self.follower_arms[arms].write("Torque_Enable", 1)
-    
+
     def disable_teleoperation(self):
         if self.robot_type in ["trossen_ai_stationary", "trossen_ai_solo"]:
             for arms in self.leader_arms:

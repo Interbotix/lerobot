@@ -328,12 +328,17 @@ def record(
                 events["exit_early"] = False
                 dataset.clear_episode_buffer()
                 continue
-            
+
             dataset.add_episode_to_batch()
 
             recorded_episodes += 1
 
-            if cfg.save_interval > 0 and cfg.save_interval != 0 and recorded_episodes % cfg.save_interval == 0 and recorded_episodes > 0:
+            if (
+                cfg.save_interval > 0
+                and cfg.save_interval != 0
+                and recorded_episodes % cfg.save_interval == 0
+                and recorded_episodes > 0
+            ):
                 log_say("Encoding and saving dataset batch...", cfg.play_sounds)
                 dataset.save_episode_batch()
 
@@ -354,7 +359,9 @@ def record(
         try:
             dataset.save_episode_batch()
         except Exception as save_exc:
-            logging.error(f"Exception occurred while saving dataset in finally block: {save_exc}", exc_info=True)
+            logging.error(
+                f"Exception occurred while saving dataset in finally block: {save_exc}", exc_info=True
+            )
 
     if cfg.push_to_hub:
         dataset.push_to_hub(tags=cfg.tags, private=cfg.private)

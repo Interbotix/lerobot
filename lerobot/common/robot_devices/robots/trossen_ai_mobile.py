@@ -1,5 +1,4 @@
 import time
-from dataclasses import replace
 from typing import Tuple
 
 import numpy as np
@@ -99,11 +98,18 @@ class TrossenAIMobile:
             self.follower_arms[arms].write("Reset", 1)
         time.sleep(2)
 
-    def teleop_start(self):
+    def enable_teleoperation(self):
         for arms in self.leader_arms:
             self.leader_arms[arms].write("Torque_Enable", 0)
         for arms in self.follower_arms:
             self.follower_arms[arms].write("Torque_Enable", 1)
+
+    def disable_teleoperation(self):
+        for arms in self.leader_arms:
+            self.leader_arms[arms].write("Torque_Enable", 1)
+        for arms in self.follower_arms:
+            self.follower_arms[arms].write("Torque_Enable", 1)
+        time.sleep(1)
 
     def connect(self) -> None:
         if self.is_connected:

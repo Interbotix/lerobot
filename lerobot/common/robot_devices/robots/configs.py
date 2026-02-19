@@ -800,7 +800,7 @@ class TrossenAISoloRobotConfig(ManipulatorRobotConfig):
 
         self.follower_arms = {
             "main": TrossenArmDriverConfig(
-                ip="192.168.1.3",
+                ip="192.168.1.4",
                 model="V0_FOLLOWER",
                 min_time_to_move_multiplier=self.min_time_to_move_multiplier,
             ),

@@ -52,7 +52,7 @@ class TrossenAIMobile:
     @property
     def motor_features(self) -> dict:
         action_names = ["linear_vel", "angular_vel"] + self.get_motor_names(self.leader_arms)
-        state_names = ["odom_x", "odom_y", "odom_theta", "linear_vel", "angular_vel"] + self.get_motor_names(
+        state_names = ["linear_vel", "angular_vel"] + self.get_motor_names(
             self.leader_arms
         )
         return {
@@ -193,9 +193,6 @@ class TrossenAIMobile:
             )
         self.base.read(self.slate_base_data)
         return {
-            "odom_x": self.slate_base_data.odom_x,
-            "odom_y": self.slate_base_data.odom_y,
-            "odom_theta": self.slate_base_data.odom_z,
             "linear_vel": self.slate_base_data.vel_x,
             "angular_vel": self.slate_base_data.vel_z,
         }

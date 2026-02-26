@@ -51,10 +51,8 @@ class TrossenAIMobile:
 
     @property
     def motor_features(self) -> dict:
-        action_names = ["linear_vel", "angular_vel"] + self.get_motor_names(self.leader_arms)
-        state_names = ["linear_vel", "angular_vel"] + self.get_motor_names(
-            self.leader_arms
-        )
+        action_names = self.get_motor_names(self.leader_arms) + ["linear_vel", "angular_vel"]
+        state_names = self.get_motor_names(self.leader_arms) + ["linear_vel", "angular_vel"]
         return {
             "action": {
                 "dtype": "float32",

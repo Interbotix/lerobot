@@ -235,11 +235,14 @@ class TrossenArmDriver:
             raise RobotDeviceNotConnectedError(
                 f"TrossenArmDriver ({self.ip}) is not connected. Try running `motors_bus.connect()` first."
             )
+        self.driver.cleanup()
+        model_name, model_end_effector = TROSSEN_ARM_MODELS[self.model]
+        self.driver.configure(model_name, model_end_effector, self.ip, True)
         self.driver.set_all_modes(trossen.Mode.velocity)
         self.driver.set_all_velocities([0.0] * self.driver.get_num_joints(), 0.0, False)
         self.driver.set_all_modes(trossen.Mode.position)
         self.driver.set_all_positions(self.home_pose, 2.0, True)
-        self.driver.set_all_positions(self.sleep_pose, 2.0, False)
+        self.driver.set_all_positions(self.sleep_pose, 2.0, True)
 
         self.is_connected = False
 

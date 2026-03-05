@@ -355,13 +355,16 @@ def record(
     except Exception as e:
         logging.error(f"An exception occurred: {e}", exc_info=True)
     finally:
+        # Flush any remaining episodes not yet saved (e.g. a partial batch at the end of recording).
+        # Guard against an empty batch, which would raise "No episodes to save" when already flushed.
         logging.info("Saving dataset...")
-        try:
-            dataset.save_episode_batch()
-        except Exception as save_exc:
-            logging.error(
-                f"Exception occurred while saving dataset in finally block: {save_exc}", exc_info=True
-            )
+        if dataset.episode_batch:
+            try:
+                dataset.save_episode_batch()
+            except Exception as save_exc:
+                logging.error(
+                    f"Exception occurred while saving dataset in finally block: {save_exc}", exc_info=True
+                )
 
     if cfg.push_to_hub:
         dataset.push_to_hub(tags=cfg.tags, private=cfg.private)

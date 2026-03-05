@@ -288,18 +288,24 @@ def control_loop(
 
 def reset_environment(robot, events, reset_time_s, fps):
     # TODO(rcadene): refactor warmup_record and reset_environment
-    if has_method(robot, "disable_teleoperation"):
-        robot.disable_teleoperation()
 
-    if has_method(robot, "enable_teleoperation"):
-        robot.enable_teleoperation()
+    # Leader arms are disabled during policy evaluation (set to empty in control_robot.py).
+    # Only enable teleoperation for the reset period when they are available, i.e. during data collection.
+    has_leader_arms = hasattr(robot, "leader_arms") and len(robot.leader_arms) > 0
+
+    if has_leader_arms:
+        if has_method(robot, "disable_teleoperation"):
+            robot.disable_teleoperation()
+
+        if has_method(robot, "enable_teleoperation"):
+            robot.enable_teleoperation()
 
     control_loop(
         robot=robot,
         control_time_s=reset_time_s,
         events=events,
         fps=fps,
-        teleoperate=True,
+        teleoperate=has_leader_arms,
     )
     if has_method(robot, "teleop_safety_stop"):
         robot.teleop_safety_stop()

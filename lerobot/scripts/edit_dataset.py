@@ -87,6 +87,7 @@ from lerobot.common.datasets.utils import (
     INFO_PATH,
     STATS_PATH,
     TASKS_PATH,
+    create_lerobot_dataset_card,
     load_episodes,
     load_episodes_stats,
     load_info,
@@ -1001,6 +1002,10 @@ def delete_episodes(dataset_dir: Path, episodes_to_delete: list[int],
         shutil.rmtree(backup)
         logger.info("Backup removed after successful validation")
 
+    # Write README.md (HuggingFace dataset card) for Hub compatibility
+    card = create_lerobot_dataset_card(dataset_info=new_info, license="apache-2.0")
+    (final_dir / "README.md").write_text(str(card))
+
     # Print summary
     episode_remap = {old_idx: new_idx for new_idx, old_idx in enumerate(keep_eps)}
     _print_delete_summary(
@@ -1193,6 +1198,10 @@ def merge_datasets(
     out_valid = validate_dataset(output_dir)
     if not out_valid:
         logger.error("Output validation FAILED for merged dataset: %s", output_dir)
+
+    # Write README.md (HuggingFace dataset card) for Hub compatibility
+    card = create_lerobot_dataset_card(dataset_info=new_info, license="apache-2.0")
+    (output_dir / "README.md").write_text(str(card))
 
     # Print summary
     _print_merge_summary(

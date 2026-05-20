@@ -104,6 +104,7 @@ class DiffusionConfig(PreTrainedConfig):
     """
 
     # Inputs / output structure.
+    type: str = "diffusion"
     n_obs_steps: int = 2
     horizon: int = 16
     n_action_steps: int = 8

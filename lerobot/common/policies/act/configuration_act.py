@@ -91,6 +91,7 @@ class ACTConfig(PreTrainedConfig):
     """
 
     # Input / output structure.
+    type: str = "act"
     n_obs_steps: int = 1
     chunk_size: int = 100
     n_action_steps: int = 100
